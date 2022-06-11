@@ -1,0 +1,224 @@
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { EventsService } from '@events/events.service';
+import { PaymentSheet } from '@payments/interfaces/payment-sheet';
+import { CreateTicketPaymentSheetDto } from '@payments/dtos/create-ticket-payment-sheet-dto';
+import { EventTicketsService } from '@event-tickets/services/event-tickets.service';
+import { GetPromotionCodeDto } from '@payments/dtos/get-promotion-code-dto';
+import { PromotionCode } from '@payments/entities/promotion-code-entity';
+import { Stripe } from 'stripe';
+import { InjectStripe } from 'nestjs-stripe';
+import { apiVersion } from '@constants/stripe-constants';
+import { TicketPaymentSession } from '@payments/entities/ticket-payment-session-entity';
+import { FirestoreRepositories } from '@firestore-repositories/firestore-repositories';
+
+@Injectable()
+export class PaymentsService {
+  constructor(
+    private eventService: EventsService,
+    private eventTicketsService: EventTicketsService,
+    private repositories: FirestoreRepositories,
+    @InjectStripe() private stripe: Stripe,
+  ) {}
+
+  async createTicketPaymentSheet(
+    dto: CreateTicketPaymentSheetDto,
+  ): Promise<PaymentSheet> {
+    const event = await this.eventService.checkIfEventIsActive(dto.eventId);
+
+    const vipPrice = dto.isVip
+      ? await this.eventTicketsService.getVipPrice(event.clubId, event.id)
+      : 0;
+
+    const serviceFeeAmount = PaymentsService.getServiceFeeAmount(
+      event.price + vipPrice,
+      event.currency,
+    );
+
+    const promotionCodeAmountOff = dto.promotionCode
+      ? await this.getPromotionCode({
+          promotionCode: dto.promotionCode,
+          userId: dto.userId,
+        }).then((code) => code.amountOff)
+      : 0;
+
+    const revenue = event.price + vipPrice;
+
+    const paymentSheetAmount = PaymentsService.getTicketPaymentSheetAmount({
+      revenue,
+      serviceFeeAmount: serviceFeeAmount,
+      promotionCodeAmountOff: promotionCodeAmountOff,
+    });
+
+    const paymentSheet = await this.createPaymentSheetForUser({
+      amount: paymentSheetAmount,
+      description: event.eventName,
+      currency: event.currency,
+      userId: dto.userId,
+    });
+
+    // TODO - add cloud task
+
+    await this.repositories.ticketPaymentSessions.create(
+      paymentSheet.paymentIntentId,
+      new TicketPaymentSession({
+        userId: dto.userId,
+        status: 'requires_payment_method',
+        revenue,
+        isVip: dto.isVip,
+        serviceFeeAmount,
+        promotionCodeAmountOff,
+        promotionCode: dto.promotionCode,
+        stripeCustomerId: paymentSheet.customerId,
+        sendInvoice: dto.sendInvoice,
+        cancelTicketReservationTaskId: '',
+        eventId: event.id,
+      }),
+    );
+
+    const updatedTicketPrice =
+      await this.eventTicketsService.updateEventTicketsOnTicketPayment(
+        event,
+        dto.isVip,
+      );
+
+    await this.eventService.updateEventOnTicketPayment(
+      event.id,
+      updatedTicketPrice,
+    );
+
+    return paymentSheet;
+  }
+
+  async getPromotionCode(dto: GetPromotionCodeDto): Promise<PromotionCode> {
+    const promotionCode = await this.repositories.promotionCodes.findById(
+      dto.userId,
+      dto.promotionCode,
+    );
+
+    if (!promotionCode) {
+      // TODO - change
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+
+    if (!promotionCode.isValid) {
+      // TODO - change
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+
+    return promotionCode;
+  }
+
+  private async createPaymentSheetForUser({
+    amount,
+    description,
+    currency,
+    userId,
+  }: CreatePaymentSheetForUserParams): Promise<PaymentSheet> {
+    const stripeCustomer = await this.repositories.stripeCustomers.findById(
+      userId,
+    );
+
+    const ephemeralKeySecret = await this.tryCreateEphemeralKey(
+      stripeCustomer.customerId,
+    );
+    const paymentMethodTypes = PaymentsService.getPaymentMethodTypes(currency);
+    const paymentIntentAmount = PaymentsService.getPaymentIntentAmount(amount);
+
+    const paymentIntent = await this.stripe.paymentIntents.create({
+      currency,
+      description,
+      amount: paymentIntentAmount,
+      customer: stripeCustomer.customerId,
+      payment_method_types: paymentMethodTypes,
+      receipt_email: stripeCustomer.email,
+    });
+
+    if (!paymentIntent.client_secret) {
+      throw new HttpException(
+        'Error creating payment intent',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return {
+      customerId: stripeCustomer.customerId,
+      ephemeralKeySecret,
+      paymentIntentSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+    };
+  }
+
+  private static getTicketPaymentSheetAmount({
+    revenue,
+    serviceFeeAmount,
+    promotionCodeAmountOff,
+  }: GetTicketPaymentSheetAmountParams) {
+    let amount = 0;
+
+    amount += revenue;
+
+    amount += serviceFeeAmount;
+
+    amount -= promotionCodeAmountOff;
+
+    return amount;
+  }
+
+  private static getServiceFeeAmount(amount: number, currency: string) {
+    // TODO - get from config
+    const fee = '0.04';
+    const minFeeAmount = PaymentsService.getMinimalFeeAmount(currency);
+    return minFeeAmount + amount * parseFloat(fee);
+  }
+
+  private static getMinimalFeeAmount(currency: string) {
+    // TODO - get from currency params
+    if (currency.toUpperCase() === 'PLN') {
+      return 1;
+    }
+
+    return 0;
+  }
+
+  private static getPaymentIntentAmount(amount: number) {
+    // TODO - add currency support
+    return amount * 100;
+  }
+
+  private static getPaymentMethodTypes(currency: string) {
+    if (currency.toUpperCase() == 'PLN' || currency.toUpperCase() == 'EUR') {
+      return ['card', 'p24'];
+    }
+
+    return ['card'];
+  }
+
+  private async tryCreateEphemeralKey(customerId: string): Promise<string> {
+    const ephemeralKey = await this.stripe.ephemeralKeys.create(
+      { customer: customerId },
+      { apiVersion: apiVersion },
+    );
+
+    if (!ephemeralKey.secret) {
+      throw new HttpException(
+        'Error creating ephemeral key',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return ephemeralKey.secret;
+  }
+}
+
+interface GetTicketPaymentSheetAmountParams {
+  revenue: number;
+  serviceFeeAmount: number;
+  promotionCodeAmountOff: number;
+}
+
+export interface CreatePaymentSheetForUserParams {
+  amount: number;
+  description: string;
+  currency: string;
+  userId: string;
+}
