@@ -1,14 +1,15 @@
 import { Module, DynamicModule } from '@nestjs/common';
-import { Firestore, Settings } from '@google-cloud/firestore';
 import {
-  FirestoreCollectionProviders,
+  FirestoreAppProvider,
   FirestoreDatabaseProvider,
   FirestoreOptionsProvider,
 } from './firestore-providers';
+import { getFirestore } from 'firebase/firestore/lite';
+import { FirebaseOptions, initializeApp } from 'firebase/app';
 
 type FirestoreModuleOptions = {
   imports: any[];
-  useFactory: (...args: any[]) => Settings;
+  useFactory: (...args: any[]) => FirebaseOptions;
   inject: any[];
 };
 
@@ -21,26 +22,24 @@ export class FirestoreModule {
       inject: options.inject,
     };
 
-    const dbProvider = {
-      provide: FirestoreDatabaseProvider,
-      useFactory: (config) => new Firestore(config),
+    const appProvider = {
+      provide: FirestoreAppProvider,
+      useFactory: () => initializeApp({}),
       inject: [FirestoreOptionsProvider],
     };
 
-    const collectionProviders = FirestoreCollectionProviders.map(
-      (providerName) => ({
-        provide: providerName,
-        useFactory: (db) => db.collection(providerName),
-        inject: [FirestoreDatabaseProvider],
-      }),
-    );
+    const dbProvider = {
+      provide: FirestoreDatabaseProvider,
+      useFactory: (app) => getFirestore(app),
+      inject: [FirestoreAppProvider],
+    };
 
     return {
       global: true,
       module: FirestoreModule,
       imports: options.imports,
-      providers: [optionsProvider, dbProvider, ...collectionProviders],
-      exports: [dbProvider, ...collectionProviders],
+      providers: [optionsProvider, dbProvider, appProvider],
+      exports: [dbProvider, appProvider],
     };
   }
 }

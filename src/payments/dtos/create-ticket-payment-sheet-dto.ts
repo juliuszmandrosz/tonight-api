@@ -5,6 +5,10 @@ export class CreateTicketPaymentSheetDto {
   @IsNotEmpty()
   eventId: string;
 
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
+
   @IsBoolean()
   isVip: boolean;
 
@@ -14,5 +18,5 @@ export class CreateTicketPaymentSheetDto {
   @IsString()
   @IsNotEmpty()
   @IsOptional()
-  promotionCode?: string;
+  promotionCode: string;
 }
