@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { TicketPoolsService } from '@event-tickets/services/ticket-pools.service';
 import { TicketSalesService } from '@event-tickets/services/ticket-sales.service';
-import { Event } from '@events/event-entity';
-import { EventTickets } from '@event-tickets/entities/event-tickets-entity';
+import { Event } from '@events/event.entity';
+import { EventTickets } from '@event-tickets/entities/event-tickets.entity';
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
 import { toJson } from '@core/json-utils';
 

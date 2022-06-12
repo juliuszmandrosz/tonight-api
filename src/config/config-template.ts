@@ -1,7 +1,13 @@
 export interface ConfigTemplate {
   serviceFee: number;
+  cloudFunctions: CloudFunctionsConfig;
   stripe: StripeConfig;
   firestore: FirestoreConfig;
+}
+
+export interface CloudFunctionsConfig {
+  endpoint: string;
+  location: string;
 }
 
 export interface StripeConfig {

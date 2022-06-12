@@ -1,22 +1,19 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { EventsService } from '@events/events.service';
-import { PaymentSheet } from '@payments/interfaces/payment-sheet';
-import { CreateTicketPaymentSheetDto } from '@payments/dtos/create-ticket-payment-sheet-dto';
+import { PaymentSheet } from '@payments/interfaces/payment.sheet.interface';
+import { CreateTicketPaymentSheetDto } from '@payments/dtos/create-ticket-payment-sheet.dto';
 import { EventTicketsService } from '@event-tickets/services/event-tickets.service';
-import { GetPromotionCodeDto } from '@payments/dtos/get-promotion-code-dto';
-import { PromotionCode } from '@payments/entities/promotion-code-entity';
+import { GetPromotionCodeDto } from '@payments/dtos/get-promotion-code.dto';
+import { PromotionCode } from '@payments/entities/promotion-code.entity';
 import { Stripe } from 'stripe';
 import { InjectStripe } from 'nestjs-stripe';
 import { apiVersion } from '@constants/stripe-constants';
-import { TicketPaymentSession } from '@payments/entities/ticket-payment-session-entity';
+import { TicketPaymentSession } from '@payments/entities/ticket-payment-session.entity';
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
 import { AppConfigService } from '@config/app-config.service';
-import { PaymentFailure } from '@payments/types/payment-failure';
+import { PaymentFailure } from '@payments/types/payment-failure.type';
+import { CloudTasksService } from '../cloud-tasks/cloud-tasks.service';
+import { CancelTicketReservationRequestDto } from '@payments/dtos/cancel-ticket-reservation-request.dto';
 
 @Injectable()
 export class PaymentsService {
@@ -25,6 +22,7 @@ export class PaymentsService {
     private eventTicketsService: EventTicketsService,
     private firestoreDataService: FirestoreDataService,
     private appConfigService: AppConfigService,
+    private cloudTasksService: CloudTasksService,
     @InjectStripe() private stripe: Stripe,
   ) {}
 
@@ -64,7 +62,10 @@ export class PaymentsService {
       userId: dto.userId,
     });
 
-    // TODO - add cloud task
+    const cancelTicketReservationTaskId =
+      await this.createCancelTicketReservationTask(
+        paymentSheet.paymentIntentId,
+      );
 
     await this.firestoreDataService.ticketPaymentSessions.create(
       paymentSheet.paymentIntentId,
@@ -78,7 +79,7 @@ export class PaymentsService {
         promotionCode: dto.promotionCode,
         stripeCustomerId: paymentSheet.customerId,
         sendInvoice: dto.sendInvoice,
-        cancelTicketReservationTaskId: '',
+        cancelTicketReservationTaskId,
         eventId: event.id,
       }),
     );
@@ -115,6 +116,23 @@ export class PaymentsService {
     }
 
     return promotionCode;
+  }
+
+  private async createCancelTicketReservationTask(
+    ticketPaymentSessionId: string,
+  ) {
+    const payload: CancelTicketReservationRequestDto = {
+      ticketPaymentSessionId,
+    };
+
+    return this.cloudTasksService.createCloudTask<CancelTicketReservationRequestDto>(
+      {
+        executionTimeInSeconds: 600,
+        payload,
+        callbackName: 'cancelEventCancelationOnCloudTaskCallback',
+        queueName: 'cancel-ticket-reservation',
+      },
+    );
   }
 
   private async createPaymentSheetForUser({

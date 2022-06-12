@@ -1,11 +1,11 @@
 import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
-import { Event } from '@events/event-entity';
-import { StripeCustomer } from '@payments/entities/stripe-customer-entity';
-import { TicketPaymentSession } from '@payments/entities/ticket-payment-session-entity';
+import { Event } from '@events/event.entity';
+import { StripeCustomer } from '@payments/entities/stripe-customer.entity';
+import { TicketPaymentSession } from '@payments/entities/ticket-payment-session.entity';
 import { Firestore } from 'firebase/firestore/lite';
-import { EventTickets } from '@event-tickets/entities/event-tickets-entity';
+import { EventTickets } from '@event-tickets/entities/event-tickets.entity';
 import { FirestoreSubcollectionRepository } from './firestore-subcollection-repository';
-import { PromotionCode } from '@payments/entities/promotion-code-entity';
+import { PromotionCode } from '@payments/entities/promotion-code.entity';
 import { FirestoreCollectionRepository } from './firestore-collection-repository';
 import { FirestoreDatabaseProvider } from '@firestore/firestore-providers';
 

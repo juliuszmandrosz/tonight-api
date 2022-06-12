@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { TicketPool } from '@event-tickets/entities/ticket-pool-entity';
-import { EventTickets } from '@event-tickets/entities/event-tickets-entity';
+import { TicketPool } from '@event-tickets/entities/ticket-pool.entity';
+import { EventTickets } from '@event-tickets/entities/event-tickets.entity';
 
 @Injectable()
 export class TicketPoolsService {

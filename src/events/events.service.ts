@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
 import { toJson } from '@core/json-utils';
-import { Event } from '@events/event-entity';
-import { EventFailure } from '@events/event-failure';
+import { Event } from '@events/event.entity';
+import { EventFailure } from '@events/event-failure.type';
 
 @Injectable()
 export class EventsService {
