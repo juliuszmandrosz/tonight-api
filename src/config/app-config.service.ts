@@ -1,7 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { FirestoreConfig, StripeConfig } from '@config/config-template';
-import { firestore, serviceFee, stripe } from '@config/config-keys';
+import {
+  CloudFunctionsConfig,
+  FirestoreConfig,
+  StripeConfig,
+} from '@config/config-template';
+import {
+  cloudFunctions,
+  firestore,
+  serviceFee,
+  stripe,
+} from '@config/config-keys';
 
 @Injectable()
 export class AppConfigService {
@@ -9,6 +18,10 @@ export class AppConfigService {
 
   getServiceFee() {
     return this.configService.get<number>(serviceFee);
+  }
+
+  getCloudFunctionsConfig() {
+    return this.configService.get<CloudFunctionsConfig>(cloudFunctions);
   }
 
   getFirestoreConfig() {

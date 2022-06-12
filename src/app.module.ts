@@ -12,6 +12,7 @@ import config from '@config/config';
 import { AppConfigModule } from '@config/app-config.module';
 import { AppConfigService } from '@config/app-config.service';
 import { CoreModule } from '@core/core.module';
+import { CloudTasksModule } from './cloud-tasks/cloud-tasks.module';
 
 @Module({
   imports: [
@@ -36,6 +37,9 @@ import { CoreModule } from '@core/core.module';
       }),
       inject: [AppConfigService],
     }),
+
+    CloudTasksModule.forRoot(),
+
     PaymentsModule,
     ClubsModule,
     EventsModule,
