@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { CreateTicketPaymentSheetDto } from '@payments/dtos/create-ticket-payment-sheet.dto';
 import { PaymentsService } from '@payments/payments.service';
 import { PaymentSheet } from '@payments/interfaces/payment.sheet.interface';
@@ -16,7 +16,7 @@ export class PaymentsController {
     return this.paymentService.createTicketPaymentSheet(dto);
   }
 
-  @Get('getPromotionCode')
+  @Post('getPromotionCode')
   getPromotionCode(@Body() dto: GetPromotionCodeDto): Promise<PromotionCode> {
     return this.paymentService.getPromotionCode(dto);
   }
