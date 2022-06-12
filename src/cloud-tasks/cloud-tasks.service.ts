@@ -1,9 +1,9 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { firestore } from 'firebase-admin';
 import Timestamp = firestore.Timestamp;
-import { AppConfigService } from '@config/app-config.service';
 import { CloudTasksClient, protos } from '@google-cloud/tasks';
 import { CloudTasksClientProvider } from './cloud-task-providers';
+import { AppConfigService } from '@config/app-config.service';
 
 @Injectable()
 export class CloudTasksService {
@@ -18,9 +18,6 @@ export class CloudTasksService {
     const projectId = this.appConfigService.getFirestoreConfig().projectId;
     const functionsLocation =
       this.appConfigService.getCloudFunctionsConfig().location;
-
-    Logger.debug(projectId);
-    Logger.debug(functionsLocation);
 
     const queuePath = this.cloudTasksClient.queuePath(
       projectId,

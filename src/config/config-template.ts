@@ -1,4 +1,5 @@
 export interface ConfigTemplate {
+  port: number;
   serviceFee: number;
   cloudFunctions: CloudFunctionsConfig;
   stripe: StripeConfig;

@@ -8,6 +8,7 @@ import {
 import {
   cloudFunctions,
   firestore,
+  port,
   serviceFee,
   stripe,
 } from '@config/config-keys';
@@ -15,6 +16,10 @@ import {
 @Injectable()
 export class AppConfigService {
   constructor(private configService: ConfigService) {}
+
+  getPort() {
+    return this.configService.get<number>(port);
+  }
 
   getServiceFee() {
     return this.configService.get<number>(serviceFee);
