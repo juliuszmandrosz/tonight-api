@@ -34,7 +34,7 @@ export class FirestoreSubcollectionRepository<T extends BaseEntity> {
     transaction?: Transaction,
   ): Promise<T | null> {
     const document = await this.findDocumentById(parentId, id, transaction);
-    if (!document.exists) return null;
+    if (!document.exists()) return null;
     const data = document.data() as T;
     data.id = id;
     return data;

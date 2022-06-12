@@ -25,7 +25,7 @@ export class FirestoreCollectionRepository<T extends BaseEntity> {
 
   async findById(id: string, transaction?: Transaction): Promise<T | null> {
     const document = await this.findDocumentById(id, transaction);
-    if (!document.exists) return null;
+    if (!document.exists()) return null;
     const data = document.data() as T;
     data.id = id;
     return data;
