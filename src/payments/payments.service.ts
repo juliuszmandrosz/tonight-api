@@ -3,7 +3,6 @@ import { EventsService } from '@events/events.service';
 import { PaymentSheet } from '@payments/interfaces/payment.sheet.interface';
 import { CreateTicketPaymentSheetDto } from '@payments/dtos/create-ticket-payment-sheet.dto';
 import { EventTicketsService } from '@event-tickets/services/event-tickets.service';
-import { GetPromotionCodeDto } from '@payments/dtos/get-promotion-code.dto';
 import { PromotionCode } from '@payments/entities/promotion-code.entity';
 import { Stripe } from 'stripe';
 import { InjectStripe } from 'nestjs-stripe';
@@ -41,10 +40,9 @@ export class PaymentsService {
     );
 
     const promotionCodeAmountOff = dto.promotionCode
-      ? await this.getPromotionCode({
-          promotionCode: dto.promotionCode,
-          userId: dto.userId,
-        }).then((code) => code.amountOff)
+      ? await this.getPromotionCode(dto.userId, dto.promotionCode).then(
+          (code) => code.amountOff,
+        )
       : 0;
 
     const revenue = event.price + vipPrice;
@@ -98,12 +96,12 @@ export class PaymentsService {
     return paymentSheet;
   }
 
-  async getPromotionCode(dto: GetPromotionCodeDto): Promise<PromotionCode> {
+  private async getPromotionCode(
+    userId: string,
+    code: string,
+  ): Promise<PromotionCode> {
     const promotionCode =
-      await this.firestoreDataService.promotionCodes.findById(
-        dto.userId,
-        dto.promotionCode,
-      );
+      await this.firestoreDataService.promotionCodes.findById(userId, code);
 
     if (!promotionCode) {
       const response: PaymentFailure = 'invalid-promotion-code';
