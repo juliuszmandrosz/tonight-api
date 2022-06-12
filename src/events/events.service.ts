@@ -1,12 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { FirestoreRepositories } from '@firestore-repositories/firestore-repositories';
+import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
 
 @Injectable()
 export class EventsService {
-  constructor(private repositories: FirestoreRepositories) {}
+  constructor(private firestoreDataService: FirestoreDataService) {}
 
   async checkIfEventIsActive(eventId: string) {
-    const event = await this.repositories.events.findById(eventId);
+    const event = await this.firestoreDataService.events.findById(eventId);
 
     if (event.isCanceled) {
       // TODO - change
@@ -22,20 +22,22 @@ export class EventsService {
   }
 
   async updateEventOnTicketPayment(eventId, price): Promise<void> {
-    await this.repositories.events.runTransaction(async (transaction) => {
-      const ref = this.repositories.events.findReferenceById(eventId);
-      const event = await this.repositories.events.findById(
-        eventId,
-        transaction,
-      );
+    await this.firestoreDataService.events.runTransaction(
+      async (transaction) => {
+        const ref = this.firestoreDataService.events.findReferenceById(eventId);
+        const event = await this.firestoreDataService.events.findById(
+          eventId,
+          transaction,
+        );
 
-      event.attending++;
-      event.price = price;
+        event.attending++;
+        event.price = price;
 
-      transaction.update(ref, {
-        attending: event.attending,
-        price: event.price,
-      });
-    });
+        transaction.update(ref, {
+          attending: event.attending,
+          price: event.price,
+        });
+      },
+    );
   }
 }

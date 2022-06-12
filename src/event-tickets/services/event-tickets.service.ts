@@ -3,12 +3,12 @@ import { TicketPoolsService } from '@event-tickets/services/ticket-pools.service
 import { TicketSalesService } from '@event-tickets/services/ticket-sales.service';
 import { Event } from '@events/event-entity';
 import { EventTickets } from '@event-tickets/entities/event-tickets-entity';
-import { FirestoreRepositories } from '@firestore-repositories/firestore-repositories';
+import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
 
 @Injectable()
 export class EventTicketsService {
   constructor(
-    private repositories: FirestoreRepositories,
+    private firestoreDataService: FirestoreDataService,
     private ticketPoolsService: TicketPoolsService,
     private ticketSalesService: TicketSalesService,
   ) {}
@@ -18,19 +18,20 @@ export class EventTicketsService {
     event: Event,
     isVip: boolean,
   ): Promise<EventTickets> {
-    return this.repositories.eventTickets.runTransaction(
+    return this.firestoreDataService.eventTickets.runTransaction(
       async (transaction) => {
         const eventTicketsRef =
-          this.repositories.eventTickets.findReferenceById(
+          this.firestoreDataService.eventTickets.findReferenceById(
             event.clubId,
             event.id,
           );
 
-        const eventTickets = await this.repositories.eventTickets.findById(
-          event.clubId,
-          event.id,
-          transaction,
-        );
+        const eventTickets =
+          await this.firestoreDataService.eventTickets.findById(
+            event.clubId,
+            event.id,
+            transaction,
+          );
 
         const vipPrice = isVip
           ? this.ticketPoolsService.getVipPriceFromCurrentPool(
@@ -59,7 +60,7 @@ export class EventTicketsService {
   }
 
   async getVipPrice(clubId: string, eventId: string) {
-    const eventTickets = await this.repositories.eventTickets.findById(
+    const eventTickets = await this.firestoreDataService.eventTickets.findById(
       clubId,
       eventId,
     );

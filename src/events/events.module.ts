@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { EventsService } from './events.service';
-import { FirestoreRepositoriesModule } from '@firestore-repositories/firestore-repositories.module';
+import { CoreModule } from '@core/core.module';
 
 @Module({
-  imports: [FirestoreRepositoriesModule],
+  imports: [CoreModule],
   providers: [EventsService],
   exports: [EventsService],
 })

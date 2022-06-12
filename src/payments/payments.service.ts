@@ -9,14 +9,16 @@ import { Stripe } from 'stripe';
 import { InjectStripe } from 'nestjs-stripe';
 import { apiVersion } from '@constants/stripe-constants';
 import { TicketPaymentSession } from '@payments/entities/ticket-payment-session-entity';
-import { FirestoreRepositories } from '@firestore-repositories/firestore-repositories';
+import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
+import { AppConfigService } from '@config/app-config.service';
 
 @Injectable()
 export class PaymentsService {
   constructor(
     private eventService: EventsService,
     private eventTicketsService: EventTicketsService,
-    private repositories: FirestoreRepositories,
+    private firestoreDataService: FirestoreDataService,
+    private appConfigService: AppConfigService,
     @InjectStripe() private stripe: Stripe,
   ) {}
 
@@ -29,7 +31,7 @@ export class PaymentsService {
       ? await this.eventTicketsService.getVipPrice(event.clubId, event.id)
       : 0;
 
-    const serviceFeeAmount = PaymentsService.getServiceFeeAmount(
+    const serviceFeeAmount = this.getServiceFeeAmount(
       event.price + vipPrice,
       event.currency,
     );
@@ -58,7 +60,7 @@ export class PaymentsService {
 
     // TODO - add cloud task
 
-    await this.repositories.ticketPaymentSessions.create(
+    await this.firestoreDataService.ticketPaymentSessions.create(
       paymentSheet.paymentIntentId,
       new TicketPaymentSession({
         userId: dto.userId,
@@ -90,10 +92,11 @@ export class PaymentsService {
   }
 
   async getPromotionCode(dto: GetPromotionCodeDto): Promise<PromotionCode> {
-    const promotionCode = await this.repositories.promotionCodes.findById(
-      dto.userId,
-      dto.promotionCode,
-    );
+    const promotionCode =
+      await this.firestoreDataService.promotionCodes.findById(
+        dto.userId,
+        dto.promotionCode,
+      );
 
     if (!promotionCode) {
       // TODO - change
@@ -114,9 +117,8 @@ export class PaymentsService {
     currency,
     userId,
   }: CreatePaymentSheetForUserParams): Promise<PaymentSheet> {
-    const stripeCustomer = await this.repositories.stripeCustomers.findById(
-      userId,
-    );
+    const stripeCustomer =
+      await this.firestoreDataService.stripeCustomers.findById(userId);
 
     const ephemeralKeySecret = await this.tryCreateEphemeralKey(
       stripeCustomer.customerId,
@@ -164,11 +166,10 @@ export class PaymentsService {
     return amount;
   }
 
-  private static getServiceFeeAmount(amount: number, currency: string) {
-    // TODO - get from config
-    const fee = '0.04';
+  private getServiceFeeAmount(amount: number, currency: string) {
+    const fee = this.appConfigService.getServiceFee();
     const minFeeAmount = PaymentsService.getMinimalFeeAmount(currency);
-    return minFeeAmount + amount * parseFloat(fee);
+    return minFeeAmount + amount * fee;
   }
 
   private static getMinimalFeeAmount(currency: string) {
