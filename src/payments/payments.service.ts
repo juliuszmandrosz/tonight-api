@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { EventsService } from '@events/events.service';
 import { PaymentSheet } from '@payments/interfaces/payment-sheet';
 import { CreateTicketPaymentSheetDto } from '@payments/dtos/create-ticket-payment-sheet-dto';
@@ -11,6 +16,7 @@ import { apiVersion } from '@constants/stripe-constants';
 import { TicketPaymentSession } from '@payments/entities/ticket-payment-session-entity';
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
 import { AppConfigService } from '@config/app-config.service';
+import { PaymentFailure } from '@payments/types/payment-failure';
 
 @Injectable()
 export class PaymentsService {
@@ -99,13 +105,13 @@ export class PaymentsService {
       );
 
     if (!promotionCode) {
-      // TODO - change
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+      const response: PaymentFailure = 'invalid-promotion-code';
+      throw new HttpException(response, HttpStatus.NOT_FOUND);
     }
 
     if (!promotionCode.isValid) {
-      // TODO - change
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+      const response: PaymentFailure = 'promotion-code-expired';
+      throw new HttpException(response, HttpStatus.GONE);
     }
 
     return promotionCode;

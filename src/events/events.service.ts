@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
 import { toJson } from '@core/json-utils';
 import { Event } from '@events/event-entity';
+import { EventFailure } from '@events/event-failure';
 
 @Injectable()
 export class EventsService {
@@ -11,13 +12,13 @@ export class EventsService {
     const event = await this.firestoreDataService.events.findById(eventId);
 
     if (event.isCanceled) {
-      // TODO - change
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+      const response: EventFailure = 'event-canceled';
+      throw new HttpException(response, HttpStatus.GONE);
     }
 
     if (event.isBeingPostponed) {
-      // TODO - change
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+      const response: EventFailure = 'event-being-postponed';
+      throw new HttpException(response, HttpStatus.GONE);
     }
 
     return event;
