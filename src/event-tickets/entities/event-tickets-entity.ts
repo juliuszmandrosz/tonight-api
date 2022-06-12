@@ -17,6 +17,7 @@ export class EventTickets implements BaseEntity {
 
   @IsNotEmpty()
   @IsString()
+  @IsOptional()
   id: string;
 
   @IsNumber()
