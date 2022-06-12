@@ -5,11 +5,11 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { v1 } from 'uuid';
 import { Stripe } from 'stripe';
 import { firestore } from 'firebase-admin';
 import Timestamp = firestore.Timestamp;
 import { BaseEntity } from '@core/base-entity';
+import { v1 } from 'uuid';
 
 export class TicketPaymentSession implements BaseEntity {
   static collectionName = 'ticketPaymentSessions';
@@ -21,7 +21,7 @@ export class TicketPaymentSession implements BaseEntity {
   @IsNotEmpty()
   @IsString()
   @IsOptional()
-  readonly id: string = v1();
+  id: string = v1();
 
   @IsString()
   @IsNotEmpty()

@@ -8,15 +8,16 @@ import {
 import { BaseEntity } from '@core/base-entity';
 import { firestore } from 'firebase-admin';
 import Timestamp = firestore.Timestamp;
+import * as randomstring from 'randomstring';
 
-export class PromotionCode implements BaseEntity {
+export class PromotionCode extends BaseEntity {
   static parentCollectionName = 'users';
   static subCollectionName = 'promotionCodes';
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   @IsOptional()
-  id: string;
+  id: string = randomstring.generate(6);
 
   @IsNumber()
   @IsNotEmpty()

@@ -6,8 +6,8 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { v1 } from 'uuid';
 import { BaseEntity } from '@core/base-entity';
+import { v1 } from 'uuid';
 
 export class Event implements BaseEntity {
   static collectionName = 'events';

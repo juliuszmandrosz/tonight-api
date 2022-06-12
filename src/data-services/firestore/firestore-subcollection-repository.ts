@@ -11,6 +11,7 @@ import {
   collection,
 } from 'firebase/firestore/lite';
 import { BaseEntity } from '@core/base-entity';
+import { toJson } from '@core/json-utils';
 
 export class FirestoreSubcollectionRepository<T extends BaseEntity> {
   constructor(
@@ -20,10 +21,7 @@ export class FirestoreSubcollectionRepository<T extends BaseEntity> {
   ) {}
 
   async create(parentId: string, id: string, item: T): Promise<void> {
-    await setDoc(
-      this.findReferenceById(parentId, id),
-      JSON.parse(JSON.stringify(item)),
-    );
+    await setDoc(this.findReferenceById(parentId, id), toJson<T>(item));
   }
 
   async delete(parentId: string, id: string): Promise<void> {

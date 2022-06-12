@@ -4,6 +4,7 @@ import { TicketSalesService } from '@event-tickets/services/ticket-sales.service
 import { Event } from '@events/event-entity';
 import { EventTickets } from '@event-tickets/entities/event-tickets-entity';
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
+import { toJson } from '@core/json-utils';
 
 @Injectable()
 export class EventTicketsService {
@@ -47,10 +48,7 @@ export class EventTicketsService {
 
         this.ticketPoolsService.updateTicketPoolsOnTicketPayment(eventTickets);
 
-        transaction.update(
-          eventTicketsRef,
-          JSON.parse(JSON.stringify(eventTickets)),
-        );
+        transaction.update(eventTicketsRef, toJson<EventTickets>(eventTickets));
 
         return this.ticketPoolsService.getCurrentOrLastPool(
           eventTickets.ticketPools,

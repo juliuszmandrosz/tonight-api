@@ -1,9 +1,12 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { BaseEntity } from '@core/base-entity';
+import { v1 } from 'uuid';
 
-export class Club {
+export class Club implements BaseEntity {
   @IsNotEmpty()
   @IsString()
-  id: string;
+  @IsOptional()
+  id: string = v1();
 
   @IsNotEmpty()
   @IsString()
