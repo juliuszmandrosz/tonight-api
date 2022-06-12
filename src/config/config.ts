@@ -2,6 +2,7 @@ import { ConfigTemplate } from '@config/config-template';
 
 export default () =>
   ({
+    port: parseInt(process.env.PORT) || 3000,
     serviceFee: parseFloat(process.env.SERVICE_FEE),
     cloudFunctions: {
       location: process.env.CLOUD_FUNCTIONS_LOCATION,
