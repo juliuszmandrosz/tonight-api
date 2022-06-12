@@ -21,6 +21,9 @@
       "@app/*": [
         "./app/*"
       ],
+      "@config/*": [
+        "./config/*"
+      ],
       "@core/*": [
         "./core/*"
       ],
@@ -39,8 +42,11 @@
       "@constants/*": [
         "./constants/*"
       ],
-      "@firestore-repositories/*": [
-        "./firestore-repositories/*"
+      "@data-services/*": [
+        "./data-services/*"
+      ],
+      "@firestore/*": [
+        "./firestore/*"
       ]
     }
   }

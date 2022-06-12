@@ -5,11 +5,13 @@ import {
   FirestoreOptionsProvider,
 } from './firestore-providers';
 import { getFirestore } from 'firebase/firestore/lite';
-import { FirebaseOptions, initializeApp } from 'firebase/app';
+import { initializeApp } from 'firebase/app';
+import { AppConfigService } from '@config/app-config.service';
+import { FirestoreConfig } from '@config/config-template';
 
 type FirestoreModuleOptions = {
   imports: any[];
-  useFactory: (...args: any[]) => FirebaseOptions;
+  useFactory: (appConfigService: AppConfigService) => FirestoreConfig;
   inject: any[];
 };
 
@@ -24,7 +26,7 @@ export class FirestoreModule {
 
     const appProvider = {
       provide: FirestoreAppProvider,
-      useFactory: () => initializeApp({}),
+      useFactory: (config: FirestoreConfig) => initializeApp(config),
       inject: [FirestoreOptionsProvider],
     };
 
