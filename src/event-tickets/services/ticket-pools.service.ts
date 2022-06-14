@@ -35,7 +35,7 @@ export class TicketPoolsService {
 
   getVipPriceFromCurrentPool(ticketPools: TicketPool[]) {
     const currentPool = this.getCurrentOrLastPool(ticketPools);
-    return currentPool.isVipEnabled ? currentPool.vipPrice : 0;
+    return currentPool.isVipEnabled ? currentPool.vipPrice : null;
   }
 
   private startNextPool(currentPool: TicketPool, ticketPools: TicketPool[]) {

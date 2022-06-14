@@ -13,6 +13,8 @@ import { AppConfigService } from '@config/app-config.service';
 import { PaymentFailure } from '@payments/types/payment-failure.type';
 import { CloudTasksService } from '@cloud-tasks/cloud-tasks.service';
 import { CancelTicketReservationRequestDto } from '@payments/dtos/cancel-ticket-reservation-request.dto';
+import { CreateVipPaymentSheetDto } from '@payments/dtos/create-vip-payment-sheet.dto';
+import { VipPaymentSession } from '@payments/entities/vip-payment-session.entity';
 
 @Injectable()
 export class PaymentsService {
@@ -34,6 +36,11 @@ export class PaymentsService {
       ? await this.eventTicketsService.getVipPrice(event.clubId, event.id)
       : 0;
 
+    if (dto.isVip && !vipPrice) {
+      const response: PaymentFailure = 'vip-no-longer-available';
+      throw new HttpException(response, HttpStatus.GONE);
+    }
+
     const serviceFeeAmount = this.getServiceFeeAmount(
       event.price + vipPrice,
       event.currency,
@@ -47,7 +54,7 @@ export class PaymentsService {
 
     const revenue = event.price + vipPrice;
 
-    const paymentSheetAmount = PaymentsService.getTicketPaymentSheetAmount({
+    const paymentSheetAmount = PaymentsService.getPaymentSheetAmount({
       revenue,
       serviceFeeAmount: serviceFeeAmount,
       promotionCodeAmountOff: promotionCodeAmountOff,
@@ -91,6 +98,78 @@ export class PaymentsService {
     await this.eventService.updateEventOnTicketPayment(
       event.id,
       updatedTicketPrice,
+    );
+
+    return paymentSheet;
+  }
+
+  async createVipPaymentSheet(
+    dto: CreateVipPaymentSheetDto,
+  ): Promise<PaymentSheet> {
+    const ticket = await this.firestoreDataService.tickets.findById(
+      dto.userId,
+      dto.ticketId,
+    );
+
+    if (!ticket) {
+      throw new HttpException('invalid-ticket', HttpStatus.NOT_FOUND);
+    }
+
+    if (ticket.isVip) {
+      const response: PaymentFailure = 'ticket-already-has-vip';
+      throw new HttpException(response, HttpStatus.CONFLICT);
+    }
+
+    const event = await this.eventService.checkIfEventIsActive(ticket.eventId);
+
+    const vipPrice = await this.eventTicketsService.getVipPrice(
+      event.clubId,
+      event.id,
+    );
+
+    if (!vipPrice) {
+      const response: PaymentFailure = 'vip-no-longer-available';
+      throw new HttpException(response, HttpStatus.GONE);
+    }
+
+    const serviceFeeAmount = this.getServiceFeeAmount(
+      event.price + vipPrice,
+      event.currency,
+    );
+
+    const promotionCodeAmountOff = dto.promotionCode
+      ? await this.getPromotionCode(dto.userId, dto.promotionCode).then(
+          (code) => code.amountOff,
+        )
+      : 0;
+
+    const paymentSheetAmount = PaymentsService.getPaymentSheetAmount({
+      revenue: vipPrice,
+      serviceFeeAmount: serviceFeeAmount,
+      promotionCodeAmountOff: promotionCodeAmountOff,
+    });
+
+    const paymentSheet = await this.createPaymentSheetForUser({
+      amount: paymentSheetAmount,
+      description: event.eventName,
+      currency: event.currency,
+      userId: dto.userId,
+    });
+
+    await this.firestoreDataService.vipPaymentSessions.create(
+      paymentSheet.paymentIntentId,
+      new VipPaymentSession({
+        userId: dto.userId,
+        status: 'requires_payment_method',
+        revenue: vipPrice,
+        serviceFeeAmount,
+        promotionCodeAmountOff,
+        promotionCode: dto.promotionCode,
+        stripeCustomerId: paymentSheet.customerId,
+        sendInvoice: dto.sendInvoice,
+        eventId: event.id,
+        ticketId: dto.ticketId,
+      }),
     );
 
     return paymentSheet;
@@ -177,7 +256,7 @@ export class PaymentsService {
     };
   }
 
-  private static getTicketPaymentSheetAmount({
+  private static getPaymentSheetAmount({
     revenue,
     serviceFeeAmount,
     promotionCodeAmountOff,
