@@ -132,10 +132,7 @@ export class PaymentsService {
       throw new HttpException(response, HttpStatus.GONE);
     }
 
-    const serviceFeeAmount = this.getServiceFeeAmount(
-      event.price + vipPrice,
-      event.currency,
-    );
+    const serviceFeeAmount = this.getServiceFeeAmount(vipPrice, event.currency);
 
     const promotionCodeAmountOff = dto.promotionCode
       ? await this.getPromotionCode(dto.userId, dto.promotionCode).then(
