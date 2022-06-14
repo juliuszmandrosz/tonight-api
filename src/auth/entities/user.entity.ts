@@ -4,6 +4,10 @@ import { BaseEntity } from '@core/base-entity';
 export class User implements BaseEntity {
   static collectionName = 'users';
 
+  constructor(params: Partial<User>) {
+    Object.assign(this, params);
+  }
+
   @IsString()
   @IsNotEmpty()
   @IsOptional()
