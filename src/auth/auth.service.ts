@@ -8,6 +8,7 @@ import { User } from '@auth/entities/user.entity';
 import { InjectStripe } from 'nestjs-stripe';
 import { Stripe } from 'stripe';
 import { StripeCustomer } from '@payments/entities/stripe-customer.entity';
+import { AuthFailure } from '@auth/types/auth.failure.type';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +29,8 @@ export class AuthService {
     );
 
     if (!user) {
-      throw new HttpException('permission-denied', HttpStatus.FORBIDDEN);
+      const response: AuthFailure = 'permission-denied';
+      throw new HttpException(response, HttpStatus.FORBIDDEN);
     }
   }
 
@@ -36,7 +38,8 @@ export class AuthService {
     const user = await this.firestoreDataService.users.findById(dto.userId);
 
     if (user) {
-      throw new HttpException('already-exists', HttpStatus.CONFLICT);
+      const response: AuthFailure = 'already-exists';
+      throw new HttpException(response, HttpStatus.CONFLICT);
     }
 
     await this.firestoreDataService.users.create(
