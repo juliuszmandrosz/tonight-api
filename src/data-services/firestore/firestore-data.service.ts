@@ -9,6 +9,8 @@ import { PromotionCode } from '@payments/entities/promotion-code.entity';
 import { FirestoreCollectionRepository } from './firestore-collection-repository';
 import { FirestoreDatabaseProvider } from '@firestore/firestore-providers';
 import { User } from '@auth/entities/user.entity';
+import { Ticket } from '@payments/entities/ticket.entity';
+import { VipPaymentSession } from '@payments/entities/vip-payment-session.entity';
 
 @Injectable()
 export class FirestoreDataService implements OnApplicationBootstrap {
@@ -18,6 +20,8 @@ export class FirestoreDataService implements OnApplicationBootstrap {
   eventTickets: FirestoreSubcollectionRepository<EventTickets>;
   promotionCodes: FirestoreSubcollectionRepository<PromotionCode>;
   users: FirestoreCollectionRepository<User>;
+  tickets: FirestoreSubcollectionRepository<Ticket>;
+  vipPaymentSessions: FirestoreCollectionRepository<VipPaymentSession>;
 
   constructor(
     @Inject(FirestoreDatabaseProvider) private firestore: Firestore,
@@ -56,5 +60,17 @@ export class FirestoreDataService implements OnApplicationBootstrap {
       this.firestore,
       User.collectionName,
     );
+
+    this.tickets = new FirestoreSubcollectionRepository<Ticket>(
+      this.firestore,
+      Ticket.parentCollectionName,
+      Ticket.subCollectionName,
+    );
+
+    this.vipPaymentSessions =
+      new FirestoreCollectionRepository<VipPaymentSession>(
+        this.firestore,
+        VipPaymentSession.collectionName,
+      );
   }
 }
