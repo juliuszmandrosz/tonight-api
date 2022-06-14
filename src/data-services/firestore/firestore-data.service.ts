@@ -8,6 +8,7 @@ import { FirestoreSubcollectionRepository } from './firestore-subcollection-repo
 import { PromotionCode } from '@payments/entities/promotion-code.entity';
 import { FirestoreCollectionRepository } from './firestore-collection-repository';
 import { FirestoreDatabaseProvider } from '@firestore/firestore-providers';
+import { User } from '@auth/entities/user.entity';
 
 @Injectable()
 export class FirestoreDataService implements OnApplicationBootstrap {
@@ -16,36 +17,44 @@ export class FirestoreDataService implements OnApplicationBootstrap {
   ticketPaymentSessions: FirestoreCollectionRepository<TicketPaymentSession>;
   eventTickets: FirestoreSubcollectionRepository<EventTickets>;
   promotionCodes: FirestoreSubcollectionRepository<PromotionCode>;
+  users: FirestoreCollectionRepository<User>;
 
-  constructor(@Inject(FirestoreDatabaseProvider) private db: Firestore) {}
+  constructor(
+    @Inject(FirestoreDatabaseProvider) private firestore: Firestore,
+  ) {}
 
   onApplicationBootstrap() {
     this.events = new FirestoreCollectionRepository<Event>(
-      this.db,
+      this.firestore,
       Event.collectionName,
     );
 
     this.stripeCustomers = new FirestoreCollectionRepository<StripeCustomer>(
-      this.db,
+      this.firestore,
       StripeCustomer.collectionName,
     );
 
     this.ticketPaymentSessions =
       new FirestoreCollectionRepository<TicketPaymentSession>(
-        this.db,
+        this.firestore,
         TicketPaymentSession.collectionName,
       );
 
     this.eventTickets = new FirestoreSubcollectionRepository<EventTickets>(
-      this.db,
+      this.firestore,
       EventTickets.parentCollectionName,
       EventTickets.subCollectionName,
     );
 
     this.promotionCodes = new FirestoreSubcollectionRepository<PromotionCode>(
-      this.db,
+      this.firestore,
       PromotionCode.parentCollectionName,
       PromotionCode.subCollectionName,
+    );
+
+    this.users = new FirestoreCollectionRepository<User>(
+      this.firestore,
+      User.collectionName,
     );
   }
 }

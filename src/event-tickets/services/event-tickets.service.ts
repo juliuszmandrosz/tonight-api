@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { TicketPoolsService } from '@event-tickets/services/ticket-pools.service';
 import { TicketSalesService } from '@event-tickets/services/ticket-sales.service';
 import { Event } from '@events/event.entity';
@@ -34,6 +34,11 @@ export class EventTicketsService {
             transaction,
           );
 
+        if (!eventTickets) {
+          const response = 'invalid-event-tickets';
+          throw new HttpException(response, HttpStatus.NOT_FOUND);
+        }
+
         const vipPrice = isVip
           ? this.ticketPoolsService.getVipPriceFromCurrentPool(
               eventTickets.ticketPools,
@@ -62,6 +67,12 @@ export class EventTicketsService {
       clubId,
       eventId,
     );
+
+    if (!eventTickets) {
+      const response = 'invalid-event-tickets';
+      throw new HttpException(response, HttpStatus.NOT_FOUND);
+    }
+
     return this.ticketPoolsService.getVipPriceFromCurrentPool(
       eventTickets.ticketPools,
     );

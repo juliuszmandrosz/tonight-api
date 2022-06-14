@@ -27,6 +27,9 @@
       "@core/*": [
         "./core/*"
       ],
+      "@auth/*": [
+        "./auth/*"
+      ],
       "@events/*": [
         "./events/*"
       ],
@@ -47,6 +50,9 @@
       ],
       "@firestore/*": [
         "./firestore/*"
+      ],
+      "@cloud-tasks/*": [
+        "./cloud-tasks/*"
       ]
     }
   }
