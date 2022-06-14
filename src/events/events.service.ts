@@ -11,6 +11,11 @@ export class EventsService {
   async checkIfEventIsActive(eventId: string) {
     const event = await this.firestoreDataService.events.findById(eventId);
 
+    if (!event) {
+      const response: EventFailure = 'invalid-event';
+      throw new HttpException(response, HttpStatus.NOT_FOUND);
+    }
+
     if (event.isCanceled) {
       const response: EventFailure = 'event-canceled';
       throw new HttpException(response, HttpStatus.GONE);
@@ -32,6 +37,11 @@ export class EventsService {
           eventId,
           transaction,
         );
+
+        if (!event) {
+          const response: EventFailure = 'invalid-event';
+          throw new HttpException(response, HttpStatus.NOT_FOUND);
+        }
 
         event.attending++;
         event.price = price;

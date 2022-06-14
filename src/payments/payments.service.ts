@@ -11,7 +11,7 @@ import { TicketPaymentSession } from '@payments/entities/ticket-payment-session.
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
 import { AppConfigService } from '@config/app-config.service';
 import { PaymentFailure } from '@payments/types/payment-failure.type';
-import { CloudTasksService } from '../cloud-tasks/cloud-tasks.service';
+import { CloudTasksService } from '@cloud-tasks/cloud-tasks.service';
 import { CancelTicketReservationRequestDto } from '@payments/dtos/cancel-ticket-reservation-request.dto';
 
 @Injectable()
@@ -141,6 +141,11 @@ export class PaymentsService {
   }: CreatePaymentSheetForUserParams): Promise<PaymentSheet> {
     const stripeCustomer =
       await this.firestoreDataService.stripeCustomers.findById(userId);
+
+    if (!stripeCustomer) {
+      const response = 'invalid-stripe-customer';
+      throw new HttpException(response, HttpStatus.NOT_FOUND);
+    }
 
     const ephemeralKeySecret = await this.tryCreateEphemeralKey(
       stripeCustomer.customerId,
