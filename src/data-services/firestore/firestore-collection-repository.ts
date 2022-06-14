@@ -3,12 +3,16 @@ import {
   DocumentReference,
   DocumentSnapshot,
   Transaction,
+  QuerySnapshot,
   runTransaction,
   deleteDoc,
   setDoc,
   doc,
   getDoc,
   collection,
+  query,
+  where,
+  getDocs,
 } from 'firebase/firestore/lite';
 import { BaseEntity } from '@core/base-entity';
 
@@ -31,12 +35,10 @@ export class FirestoreCollectionRepository<T extends BaseEntity> {
     return data;
   }
 
-  findDocumentById(
-    id: string,
-    transaction?: Transaction,
-  ): Promise<DocumentSnapshot> {
-    const ref = this.findReferenceById(id);
-    return transaction ? transaction.get(ref) : getDoc(ref);
+  async findOneByField(fieldName: string, value: string): Promise<T | null> {
+    const q = await this.findDocumentsByField(fieldName, value);
+    if (q.docs.length == 0) return null;
+    return q.docs[0].data() as T;
   }
 
   runTransaction(
@@ -48,5 +50,23 @@ export class FirestoreCollectionRepository<T extends BaseEntity> {
   findReferenceById(id: string): DocumentReference {
     const col = collection(this.firestore, this.collectionName);
     return doc(col, id);
+  }
+
+  private findDocumentById(
+    id: string,
+    transaction?: Transaction,
+  ): Promise<DocumentSnapshot> {
+    const ref = this.findReferenceById(id);
+    return transaction ? transaction.get(ref) : getDoc(ref);
+  }
+
+  private findDocumentsByField(
+    fieldName: string,
+    value: string,
+  ): Promise<QuerySnapshot> {
+    const col = collection(this.firestore, this.collectionName);
+    const q = query(col, where(fieldName, '==', value));
+
+    return getDocs(q);
   }
 }
