@@ -11,6 +11,7 @@ import { FirestoreDatabaseProvider } from '@firestore/firestore-providers';
 import { User } from '@auth/entities/user.entity';
 import { Ticket } from '@payments/entities/ticket.entity';
 import { VipPaymentSession } from '@payments/entities/vip-payment-session.entity';
+import { Partner } from '@auth/entities/partner.entity';
 
 @Injectable()
 export class FirestoreDataService implements OnApplicationBootstrap {
@@ -22,6 +23,7 @@ export class FirestoreDataService implements OnApplicationBootstrap {
   users: FirestoreCollectionRepository<User>;
   tickets: FirestoreSubcollectionRepository<Ticket>;
   vipPaymentSessions: FirestoreCollectionRepository<VipPaymentSession>;
+  partners: FirestoreCollectionRepository<Partner>;
 
   constructor(
     @Inject(FirestoreDatabaseProvider) private firestore: Firestore,
@@ -72,5 +74,10 @@ export class FirestoreDataService implements OnApplicationBootstrap {
         this.firestore,
         VipPaymentSession.collectionName,
       );
+
+    this.partners = new FirestoreCollectionRepository<Partner>(
+      this.firestore,
+      Partner.collectionName,
+    );
   }
 }
