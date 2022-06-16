@@ -1,4 +1,5 @@
 export type AuthFailure =
   | 'already-exists'
   | 'permission-denied'
-  | 'invalid-access-code';
+  | 'invalid-access-code'
+  | 'not-found';
