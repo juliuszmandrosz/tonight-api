@@ -3,6 +3,7 @@ import { CheckClaimDto } from '@auth/dtos/check-claim.dto';
 import { AuthService } from '@auth/auth.service';
 import { AddUserDto } from '@auth/dtos/add-user.dto';
 import { CheckIfPartnerCanSignUpDto } from '@auth/dtos/check-if-partner-can-sign-up.dto';
+import { AddPartnerDto } from '@auth/dtos/add-partner.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -21,5 +22,10 @@ export class AuthController {
   @Post('checkIfPartnerCanSignUp')
   checkPartnerClaim(@Body() dto: CheckIfPartnerCanSignUpDto): Promise<void> {
     return this.authService.checkIfPartnerCanSignUp(dto);
+  }
+
+  @Post('addPartner')
+  addPartner(@Body() dto: AddPartnerDto): Promise<void> {
+    return this.authService.addPartner(dto);
   }
 }
