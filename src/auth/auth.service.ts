@@ -9,6 +9,9 @@ import { InjectStripe } from 'nestjs-stripe';
 import { Stripe } from 'stripe';
 import { StripeCustomer } from '@payments/entities/stripe-customer.entity';
 import { AuthFailure } from '@auth/types/auth.failure.type';
+import { firestore } from 'firebase-admin';
+import Timestamp = firestore.Timestamp;
+import { CheckIfPartnerCanSignUpDto } from '@auth/dtos/check-if-partner-can-sign-up.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,20 +21,21 @@ export class AuthService {
     private firestoreDataService: FirestoreDataService,
   ) {}
 
-  async checkUserClaim(dto: CheckClaimDto) {
+  async checkIfUserCanSignIn(dto: CheckClaimDto) {
     const account = await this.checkIfAccountExists(dto.email);
 
     if (!account) return;
 
-    const user = await this.firestoreDataService.users.findOneByField(
-      'email',
-      dto.email,
-    );
+    await this.checkUserClaim(dto.email);
+  }
 
-    if (!user) {
-      const response: AuthFailure = 'permission-denied';
-      throw new HttpException(response, HttpStatus.FORBIDDEN);
+  async checkIfPartnerCanSignUp(dto: CheckIfPartnerCanSignUpDto) {
+    if (await this.checkIfAccountExists(dto.email)) {
+      const response: AuthFailure = 'already-exists';
+      throw new HttpException(response, HttpStatus.CONFLICT);
     }
+
+    await this.checkPartnerAccessCode(dto.accessCode);
   }
 
   async addUser(dto: AddUserDto) {
@@ -56,7 +60,7 @@ export class AuthService {
     await this.addStripeCustomer(dto);
   }
 
-  private async checkIfAccountExists(email: string): Promise<boolean> {
+  private async checkIfAccountExists(email: string) {
     const providers = await fetchSignInMethodsForEmail(
       this.firebaseAuth,
       email,
@@ -83,5 +87,46 @@ export class AuthService {
         email: dto.email,
       }),
     );
+  }
+
+  private async checkPartnerClaim(email: string) {
+    const partner = await this.firestoreDataService.partners.findOneByField(
+      'email',
+      email,
+    );
+
+    if (!partner) {
+      const response: AuthFailure = 'permission-denied';
+      throw new HttpException(response, HttpStatus.FORBIDDEN);
+    }
+  }
+
+  private async checkUserClaim(email: string) {
+    const user = await this.firestoreDataService.users.findOneByField(
+      'email',
+      email,
+    );
+
+    if (!user) {
+      const response: AuthFailure = 'permission-denied';
+      throw new HttpException(response, HttpStatus.FORBIDDEN);
+    }
+  }
+
+  private async checkPartnerAccessCode(code: string) {
+    const accessCode =
+      await this.firestoreDataService.partnerAccessCodes.findById(code);
+
+    if (!accessCode) {
+      const response: AuthFailure = 'invalid-access-code';
+      throw new HttpException(response, HttpStatus.NOT_FOUND);
+    }
+
+    if (
+      Timestamp.now().toMillis() >= accessCode.expirationDateTime.toMillis()
+    ) {
+      const response: AuthFailure = 'invalid-access-code';
+      throw new HttpException(response, HttpStatus.GONE);
+    }
   }
 }
