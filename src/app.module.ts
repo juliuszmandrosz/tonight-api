@@ -19,7 +19,7 @@ import { AuthModule } from '@auth/auth.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['src/config/.dev.env'],
+      envFilePath: ['.env'],
       load: [config],
     }),
 
