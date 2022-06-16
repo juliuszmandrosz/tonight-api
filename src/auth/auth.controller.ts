@@ -19,8 +19,15 @@ export class AuthController {
     return this.authService.addUser(dto);
   }
 
+  @Post('checkIfPartnerCanSignIn')
+  checkIfPartnerCanSignIn(@Body() dto: CheckClaimDto): Promise<void> {
+    return this.authService.checkIfPartnerCanSignIn(dto);
+  }
+
   @Post('checkIfPartnerCanSignUp')
-  checkPartnerClaim(@Body() dto: CheckIfPartnerCanSignUpDto): Promise<void> {
+  checkIfPartnerCanSignUp(
+    @Body() dto: CheckIfPartnerCanSignUpDto,
+  ): Promise<void> {
     return this.authService.checkIfPartnerCanSignUp(dto);
   }
 

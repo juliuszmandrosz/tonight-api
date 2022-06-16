@@ -31,6 +31,17 @@ export class AuthService {
     await this.checkUserClaim(dto.email);
   }
 
+  async checkIfPartnerCanSignIn(dto: CheckClaimDto) {
+    const account = await this.checkIfAccountExists(dto.email);
+
+    if (!account) {
+      const response: AuthFailure = 'not-found';
+      throw new HttpException(response, HttpStatus.NOT_FOUND);
+    }
+
+    await this.checkPartnerClaim(dto.email);
+  }
+
   async checkIfPartnerCanSignUp(dto: CheckIfPartnerCanSignUpDto) {
     if (await this.checkIfAccountExists(dto.email)) {
       const response: AuthFailure = 'already-exists';
