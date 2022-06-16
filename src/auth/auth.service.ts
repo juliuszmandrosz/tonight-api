@@ -12,6 +12,8 @@ import { AuthFailure } from '@auth/types/auth.failure.type';
 import { firestore } from 'firebase-admin';
 import Timestamp = firestore.Timestamp;
 import { CheckIfPartnerCanSignUpDto } from '@auth/dtos/check-if-partner-can-sign-up.dto';
+import { AddPartnerDto } from '@auth/dtos/add-partner.dto';
+import { Partner } from '@auth/entities/partner.entity';
 
 @Injectable()
 export class AuthService {
@@ -57,7 +59,38 @@ export class AuthService {
       }),
     );
 
-    await this.addStripeCustomer(dto);
+    await this.addStripeCustomer({
+      email: dto.email,
+      accountId: dto.userId,
+      locale: dto.locale,
+    });
+  }
+
+  async addPartner(dto: AddPartnerDto) {
+    const partner = await this.firestoreDataService.partners.findById(
+      dto.partnerId,
+    );
+
+    if (partner) {
+      const response: AuthFailure = 'already-exists';
+      throw new HttpException(response, HttpStatus.CONFLICT);
+    }
+
+    const accessCode = await this.usePartnerAccessCode(dto.accessCode);
+
+    await this.firestoreDataService.partners.create(
+      dto.partnerId,
+      new Partner({
+        email: dto.email,
+        clubId: accessCode.clubId,
+      }),
+    );
+
+    await this.addStripeCustomer({
+      email: dto.email,
+      accountId: dto.partnerId,
+      locale: dto.locale,
+    });
   }
 
   private async checkIfAccountExists(email: string) {
@@ -69,10 +102,14 @@ export class AuthService {
     return providers.length > 0;
   }
 
-  private async addStripeCustomer(dto: AddUserDto) {
+  private async addStripeCustomer({
+    accountId,
+    email,
+    locale,
+  }: AddStripeCustomerParams) {
     const customer = await this.stripe.customers.create({
-      email: dto.email,
-      preferred_locales: [dto.locale],
+      email: email,
+      preferred_locales: [locale],
     });
 
     const intent = await this.stripe.setupIntents.create({
@@ -80,11 +117,11 @@ export class AuthService {
     });
 
     await this.firestoreDataService.stripeCustomers.create(
-      dto.userId,
+      accountId,
       new StripeCustomer({
         customerId: customer.id,
         setupSecret: intent.client_secret,
-        email: dto.email,
+        email,
       }),
     );
   }
@@ -129,4 +166,24 @@ export class AuthService {
       throw new HttpException(response, HttpStatus.GONE);
     }
   }
+
+  private async usePartnerAccessCode(code: string) {
+    const accessCode =
+      await this.firestoreDataService.partnerAccessCodes.findById(code);
+
+    if (!accessCode) {
+      const response: AuthFailure = 'invalid-access-code';
+      throw new HttpException(response, HttpStatus.NOT_FOUND);
+    }
+
+    await this.firestoreDataService.partnerAccessCodes.delete(code);
+
+    return accessCode;
+  }
+}
+
+interface AddStripeCustomerParams {
+  accountId: string;
+  email: string;
+  locale: string;
 }
