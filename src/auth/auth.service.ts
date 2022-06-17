@@ -62,7 +62,7 @@ export class AuthService {
     await this.firestoreDataService.users.create(
       dto.userId,
       new User({
-        email: dto.email,
+        email: dto.email.toLowerCase(),
         username: '',
         favoriteEventIds: [],
         favoriteClubIds: [],
@@ -92,7 +92,7 @@ export class AuthService {
     await this.firestoreDataService.partners.create(
       dto.partnerId,
       new Partner({
-        email: dto.email,
+        email: dto.email.toLowerCase(),
         clubId: accessCode.clubId,
       }),
     );
@@ -107,7 +107,7 @@ export class AuthService {
   private async checkIfAccountExists(email: string) {
     const providers = await fetchSignInMethodsForEmail(
       this.firebaseAuth,
-      email,
+      email.toLowerCase(),
     );
 
     return providers.length > 0;
@@ -119,7 +119,7 @@ export class AuthService {
     locale,
   }: AddStripeCustomerParams) {
     const customer = await this.stripe.customers.create({
-      email: email,
+      email: email.toLowerCase(),
       preferred_locales: [locale],
     });
 
@@ -140,7 +140,7 @@ export class AuthService {
   private async checkPartnerClaim(email: string) {
     const partner = await this.firestoreDataService.partners.findOneByField(
       'email',
-      email,
+      email.toLowerCase(),
     );
 
     if (!partner) {
@@ -152,7 +152,7 @@ export class AuthService {
   private async checkUserClaim(email: string) {
     const user = await this.firestoreDataService.users.findOneByField(
       'email',
-      email,
+      email.toLowerCase(),
     );
 
     if (!user) {
