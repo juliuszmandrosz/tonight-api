@@ -203,7 +203,7 @@ export class PaymentsService {
       {
         executionTimeInSeconds: 600,
         payload,
-        callbackName: 'cancelEventCancelationOnCloudTaskCallback',
+        callbackName: 'cancelTicketReservationOnCloudTaskCallback',
         queueName: 'cancel-ticket-reservation',
       },
     );
