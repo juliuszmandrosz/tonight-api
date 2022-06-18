@@ -290,7 +290,7 @@ export class PaymentsService {
   }
 
   private static getPaymentMethodTypes(currency: string) {
-    if (currency.toUpperCase() == 'PLN' || currency.toUpperCase() == 'EUR') {
+    if (currency.toUpperCase() === 'PLN' || currency.toUpperCase() === 'EUR') {
       return ['card', 'p24'];
     }
 
