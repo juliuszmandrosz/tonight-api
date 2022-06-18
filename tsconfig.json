@@ -53,6 +53,9 @@
       ],
       "@cloud-tasks/*": [
         "./cloud-tasks/*"
+      ],
+      "@selectors-access-codes/*": [
+        "./selectors-access-codes/*"
       ]
     }
   }

@@ -104,6 +104,18 @@ export class AuthService {
     });
   }
 
+  async checkPartnerClaim(email: string) {
+    const partner = await this.firestoreDataService.partners.findOneByField(
+      'email',
+      email.toLowerCase(),
+    );
+
+    if (!partner) {
+      const response: AuthFailure = 'permission-denied';
+      throw new HttpException(response, HttpStatus.FORBIDDEN);
+    }
+  }
+
   private async checkIfAccountExists(email: string) {
     const providers = await fetchSignInMethodsForEmail(
       this.firebaseAuth,
@@ -137,18 +149,6 @@ export class AuthService {
     );
   }
 
-  private async checkPartnerClaim(email: string) {
-    const partner = await this.firestoreDataService.partners.findOneByField(
-      'email',
-      email.toLowerCase(),
-    );
-
-    if (!partner) {
-      const response: AuthFailure = 'permission-denied';
-      throw new HttpException(response, HttpStatus.FORBIDDEN);
-    }
-  }
-
   private async checkUserClaim(email: string) {
     const user = await this.firestoreDataService.users.findOneByField(
       'email',
@@ -163,7 +163,7 @@ export class AuthService {
 
   private async checkPartnerAccessCode(code: string) {
     const accessCode =
-      await this.firestoreDataService.partnerAccessCodes.findById(code);
+      await this.firestoreDataService.partnersAccessCodes.findById(code);
 
     if (!accessCode) {
       const response: AuthFailure = 'invalid-access-code';
@@ -180,14 +180,14 @@ export class AuthService {
 
   private async usePartnerAccessCode(code: string) {
     const accessCode =
-      await this.firestoreDataService.partnerAccessCodes.findById(code);
+      await this.firestoreDataService.partnersAccessCodes.findById(code);
 
     if (!accessCode) {
       const response: AuthFailure = 'invalid-access-code';
       throw new HttpException(response, HttpStatus.NOT_FOUND);
     }
 
-    await this.firestoreDataService.partnerAccessCodes.delete(code);
+    await this.firestoreDataService.partnersAccessCodes.delete(code);
 
     return accessCode;
   }
