@@ -46,7 +46,8 @@ export class TicketPaymentSession implements BaseEntity {
   cancelTicketReservationTaskId: string;
 
   @IsBoolean()
-  isRefunded: boolean;
+  @IsOptional()
+  isRefunded = false;
 
   @IsNumber()
   @IsNotEmpty()
