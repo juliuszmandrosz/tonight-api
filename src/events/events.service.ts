@@ -3,6 +3,8 @@ import { FirestoreDataService } from '@data-services/firestore/firestore-data.se
 import { toJson } from '@core/json-utils';
 import { Event } from '@events/event.entity';
 import { EventFailure } from '@events/event-failure.type';
+import { firestore } from 'firebase-admin';
+import Timestamp = firestore.Timestamp;
 
 @Injectable()
 export class EventsService {
@@ -14,6 +16,11 @@ export class EventsService {
     if (!event) {
       const response: EventFailure = 'invalid-event';
       throw new HttpException(response, HttpStatus.NOT_FOUND);
+    }
+
+    if (Timestamp.fromMillis(event.eventEndDateTime) < Timestamp.now()) {
+      const response: EventFailure = 'event-has-ended';
+      throw new HttpException(response, HttpStatus.GONE);
     }
 
     if (event.isCanceled) {
