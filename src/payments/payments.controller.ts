@@ -3,6 +3,7 @@ import { CreateTicketPaymentSheetDto } from '@payments/dtos/create-ticket-paymen
 import { PaymentsService } from '@payments/payments.service';
 import { PaymentSheet } from '@payments/interfaces/payment.sheet.interface';
 import { CreateVipPaymentSheetDto } from '@payments/dtos/create-vip-payment-sheet.dto';
+import { CancelTicketReservationDto } from '@payments/dtos/cancel-ticket-reservation.dto';
 
 @Controller('payments')
 export class PaymentsController {
@@ -20,5 +21,12 @@ export class PaymentsController {
     @Body() dto: CreateVipPaymentSheetDto,
   ): Promise<PaymentSheet> {
     return this.paymentService.createVipPaymentSheet(dto);
+  }
+
+  @Post('cancelTicketReservation')
+  cancelTicketReservation(
+    @Body() dto: CancelTicketReservationDto,
+  ): Promise<void> {
+    return this.paymentService.cancelTicketReservation(dto);
   }
 }

@@ -36,7 +36,10 @@ export class EventsService {
     return event;
   }
 
-  async updateEventOnTicketPayment(eventId, price): Promise<void> {
+  async updateEventOnTicketPayment(
+    eventId: string,
+    price: number,
+  ): Promise<void> {
     await this.firestoreDataService.events.runTransaction(
       async (transaction) => {
         const ref = this.firestoreDataService.events.findReferenceById(eventId);
@@ -51,6 +54,31 @@ export class EventsService {
         }
 
         event.attending++;
+        event.price = price;
+
+        transaction.update(ref, toJson<Event>(event));
+      },
+    );
+  }
+
+  async updateEventOnCancelReservation(
+    eventId: string,
+    price: number,
+  ): Promise<void> {
+    await this.firestoreDataService.events.runTransaction(
+      async (transaction) => {
+        const ref = this.firestoreDataService.events.findReferenceById(eventId);
+        const event = await this.firestoreDataService.events.findById(
+          eventId,
+          transaction,
+        );
+
+        if (!event) {
+          const response: EventFailure = 'invalid-event';
+          throw new HttpException(response, HttpStatus.NOT_FOUND);
+        }
+
+        event.attending--;
         event.price = price;
 
         transaction.update(ref, toJson<Event>(event));

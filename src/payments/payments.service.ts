@@ -12,9 +12,10 @@ import { FirestoreDataService } from '@data-services/firestore/firestore-data.se
 import { AppConfigService } from '@config/app-config.service';
 import { PaymentFailure } from '@payments/types/payment-failure.type';
 import { CloudTasksService } from '@cloud-tasks/cloud-tasks.service';
-import { CancelTicketReservationRequestDto } from '@payments/dtos/cancel-ticket-reservation-request.dto';
+import { CancelTicketReservationDto } from '@payments/dtos/cancel-ticket-reservation.dto';
 import { CreateVipPaymentSheetDto } from '@payments/dtos/create-vip-payment-sheet.dto';
 import { VipPaymentSession } from '@payments/entities/vip-payment-session.entity';
+import { EventFailure } from '@events/event-failure.type';
 
 @Injectable()
 export class PaymentsService {
@@ -172,6 +173,52 @@ export class PaymentsService {
     return paymentSheet;
   }
 
+  async cancelTicketReservation(dto: CancelTicketReservationDto) {
+    const session =
+      await this.firestoreDataService.ticketPaymentSessions.findById(
+        dto.ticketPaymentSessionId,
+      );
+
+    if (!session) {
+      const response = 'invalid-ticket-payment-session';
+      throw new HttpException(response, HttpStatus.NOT_FOUND);
+    }
+
+    if (session.status === 'canceled') return;
+
+    await this.cloudTasksService.deleteCloudTask(
+      session.cancelTicketReservationTaskId,
+    );
+
+    session.status = 'canceled';
+
+    await this.firestoreDataService.ticketPaymentSessions.update(
+      session.id,
+      session,
+    );
+
+    const event = await this.firestoreDataService.events.findById(
+      session.eventId,
+    );
+
+    if (!event) {
+      const response: EventFailure = 'invalid-event';
+      throw new HttpException(response, HttpStatus.NOT_FOUND);
+    }
+
+    const updatedTicketPrice =
+      await this.eventTicketsService.updateEventTicketsOnCancelReservation({
+        event,
+        isVip: session.isVip,
+        canceledAmount: session.revenue,
+      });
+
+    await this.eventService.updateEventOnCancelReservation(
+      event.id,
+      updatedTicketPrice,
+    );
+  }
+
   private async getPromotionCode(
     userId: string,
     code: string,
@@ -195,18 +242,16 @@ export class PaymentsService {
   private async createCancelTicketReservationTask(
     ticketPaymentSessionId: string,
   ) {
-    const payload: CancelTicketReservationRequestDto = {
+    const payload: CancelTicketReservationDto = {
       ticketPaymentSessionId,
     };
 
-    return this.cloudTasksService.createCloudTask<CancelTicketReservationRequestDto>(
-      {
-        executionTimeInSeconds: 600,
-        payload,
-        callbackName: 'cancelTicketReservationOnCloudTaskCallback',
-        queueName: 'cancel-ticket-reservation',
-      },
-    );
+    return this.cloudTasksService.createCloudTask<CancelTicketReservationDto>({
+      executionTimeInSeconds: 600,
+      payload,
+      callbackName: 'cancelTicketReservationOnCloudTaskCallback',
+      queueName: 'cancel-ticket-reservation',
+    });
   }
 
   private async createPaymentSheetForUser({
