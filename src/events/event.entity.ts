@@ -39,6 +39,10 @@ export class Event implements BaseEntity {
 
   @IsNumber()
   @IsNotEmpty()
+  originalStartDateTime: number;
+
+  @IsNumber()
+  @IsNotEmpty()
   minAge: number;
 
   @IsNumber()
