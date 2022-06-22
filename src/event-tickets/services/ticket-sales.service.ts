@@ -21,6 +21,26 @@ export class TicketSalesService {
     );
   }
 
+  reduceTicketSalesBySingleTransaction({
+    ticketSales,
+    canceledAmount,
+    isVip,
+  }: ReduceTicketSalesBySingleTransactionParams) {
+    const canceledClubIncome = TicketSalesService.getClubIncome(
+      canceledAmount,
+      ticketSales.eventFee,
+    );
+
+    ticketSales.ticketsSold--;
+
+    if (isVip) {
+      ticketSales.vipsSold--;
+    }
+
+    ticketSales.totalRevenue -= canceledAmount;
+    ticketSales.clubIncome -= canceledClubIncome;
+  }
+
   private static getClubIncome(amount: number, eventFee: number) {
     const fee = TicketSalesService.getEventFeeAmount(amount, eventFee);
     return amount - fee;
@@ -35,4 +55,10 @@ interface UpdateEventTicketsOnTicketPaymentParams {
   revenue: number;
   isVip: boolean;
   ticketSales: TicketSales;
+}
+
+interface ReduceTicketSalesBySingleTransactionParams {
+  ticketSales: TicketSales;
+  canceledAmount: number;
+  isVip: boolean;
 }

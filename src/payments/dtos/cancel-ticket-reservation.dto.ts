@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CancelTicketReservationRequestDto {
+export class CancelTicketReservationDto {
   @IsString()
   @IsNotEmpty()
   ticketPaymentSessionId: string;
