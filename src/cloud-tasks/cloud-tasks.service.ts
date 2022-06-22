@@ -35,6 +35,10 @@ export class CloudTasksService {
     return response.name;
   }
 
+  async deleteCloudTask(id: string) {
+    await this.cloudTasksClient.deleteTask({ name: id });
+  }
+
   private getCloudTaskBody<T>(params: CreateCloudTaskParams<T>) {
     return {
       httpRequest: {

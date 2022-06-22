@@ -18,7 +18,7 @@ export class EventTicketsService {
   async updateEventTicketsOnTicketPayment(
     event: Event,
     isVip: boolean,
-  ): Promise<EventTickets> {
+  ): Promise<number> {
     return this.firestoreDataService.eventTickets.runTransaction(
       async (transaction) => {
         const eventTicketsRef =
@@ -62,6 +62,49 @@ export class EventTicketsService {
     );
   }
 
+  /// Returns ticket price after update
+  async updateEventTicketsOnCancelReservation({
+    event,
+    isVip,
+    canceledAmount,
+  }: UpdateEventTicketsOnCancelReservationParams): Promise<number> {
+    return this.firestoreDataService.eventTickets.runTransaction(
+      async (transaction) => {
+        const eventTicketsRef =
+          this.firestoreDataService.eventTickets.findReferenceById(
+            event.clubId,
+            event.id,
+          );
+
+        const eventTickets =
+          await this.firestoreDataService.eventTickets.findById(
+            event.clubId,
+            event.id,
+            transaction,
+          );
+
+        if (!eventTickets) {
+          const response = 'invalid-event-tickets';
+          throw new HttpException(response, HttpStatus.NOT_FOUND);
+        }
+
+        this.ticketSalesService.reduceTicketSalesBySingleTransaction({
+          canceledAmount,
+          ticketSales: eventTickets.ticketSales,
+          isVip,
+        });
+
+        this.ticketPoolsService.revertSingleTicketFromPools(eventTickets);
+
+        transaction.update(eventTicketsRef, toJson<EventTickets>(eventTickets));
+
+        return this.ticketPoolsService.getCurrentOrLastPool(
+          eventTickets.ticketPools,
+        ).ticketPrice;
+      },
+    );
+  }
+
   async getVipPrice(clubId: string, eventId: string) {
     const eventTickets = await this.firestoreDataService.eventTickets.findById(
       clubId,
@@ -77,4 +120,10 @@ export class EventTicketsService {
       eventTickets.ticketPools,
     );
   }
+}
+
+interface UpdateEventTicketsOnCancelReservationParams {
+  event: Event;
+  isVip: boolean;
+  canceledAmount: number;
 }

@@ -28,6 +28,22 @@ export class TicketPoolsService {
     }
   }
 
+  revertSingleTicketFromPools(tickets: EventTickets) {
+    tickets.isSoldOut = false;
+
+    const ticketPools = tickets.ticketPools;
+
+    const currentPool = this.getCurrentOrLastPool(ticketPools);
+
+    if (currentPool.ticketsSold === 0) {
+      TicketPoolsService.resetPool(currentPool);
+      this.startPreviousPool(currentPool, ticketPools);
+      return;
+    }
+
+    TicketPoolsService.restorePool(currentPool);
+  }
+
   getCurrentOrLastPool(ticketPools: TicketPool[]) {
     const lastPool = ticketPools[ticketPools.length - 1];
     return ticketPools.find((pool) => pool.isCurrent) ?? lastPool;
@@ -40,7 +56,7 @@ export class TicketPoolsService {
 
   private startNextPool(currentPool: TicketPool, ticketPools: TicketPool[]) {
     const nextPool = ticketPools.find(
-      (pool) => pool.poolNumber == currentPool.poolNumber + 1,
+      (pool) => pool.poolNumber === currentPool.poolNumber + 1,
     );
 
     if (!nextPool) return;
@@ -49,5 +65,35 @@ export class TicketPoolsService {
 
     const index = ticketPools.indexOf(nextPool);
     ticketPools[index] = nextPool;
+  }
+
+  private startPreviousPool(
+    currentPool: TicketPool,
+    ticketPools: TicketPool[],
+  ) {
+    if (currentPool.poolNumber === 1) return;
+
+    const previousPool = ticketPools.find(
+      (pool) => pool.poolNumber == currentPool.poolNumber - 1,
+    );
+
+    if (!previousPool) return;
+
+    TicketPoolsService.restorePool(previousPool);
+
+    const index = ticketPools.indexOf(previousPool);
+    ticketPools[index] = previousPool;
+  }
+
+  private static restorePool(pool: TicketPool) {
+    pool.ticketsSold--;
+    pool.isSoldOut = false;
+    pool.isCurrent = true;
+  }
+
+  private static resetPool(pool: TicketPool) {
+    pool.ticketsSold = 0;
+    pool.isSoldOut = false;
+    pool.isCurrent = false;
   }
 }

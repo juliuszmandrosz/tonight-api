@@ -13,6 +13,7 @@ import {
   query,
   where,
   getDocs,
+  updateDoc,
 } from 'firebase/firestore/lite';
 import { BaseEntity } from '@core/base-entity';
 
@@ -21,6 +22,13 @@ export class FirestoreCollectionRepository<T extends BaseEntity> {
 
   async create(id: string, item: T): Promise<void> {
     await setDoc(this.findReferenceById(id), JSON.parse(JSON.stringify(item)));
+  }
+
+  async update(id: string, item: T): Promise<void> {
+    await updateDoc(
+      this.findReferenceById(id),
+      JSON.parse(JSON.stringify(item)),
+    );
   }
 
   async delete(id: string): Promise<void> {
@@ -37,7 +45,7 @@ export class FirestoreCollectionRepository<T extends BaseEntity> {
 
   async findOneByField(fieldName: string, value: string): Promise<T | null> {
     const q = await this.findDocumentsByField(fieldName, value);
-    if (q.docs.length == 0) return null;
+    if (q.docs.length === 0) return null;
     return q.docs[0].data() as T;
   }
 
