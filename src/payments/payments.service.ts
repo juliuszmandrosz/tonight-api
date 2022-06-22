@@ -33,6 +33,8 @@ export class PaymentsService {
   ): Promise<PaymentSheet> {
     const event = await this.eventService.checkIfEventIsActive(dto.eventId);
 
+    await this.cancelExistingPaymentSession(dto.eventId, dto.userId);
+
     const vipPrice = dto.isVip
       ? await this.eventTicketsService.getVipPrice(event.clubId, event.id)
       : 0;
@@ -356,6 +358,25 @@ export class PaymentsService {
     }
 
     return ephemeralKey.secret;
+  }
+
+  private async cancelExistingPaymentSession(eventId: string, userId: string) {
+    const existingTicketPaymentSession =
+      await this.firestoreDataService.ticketPaymentSessions.findOneByParams([
+        { fieldName: 'eventId', operator: '==', fieldValue: eventId },
+        { fieldName: 'userId', operator: '==', fieldValue: userId },
+        {
+          fieldName: 'status',
+          operator: 'in',
+          fieldValue: ['requires_payment_method', 'requires_action'],
+        },
+      ]);
+
+    if (existingTicketPaymentSession) {
+      await this.cancelTicketReservation({
+        ticketPaymentSessionId: existingTicketPaymentSession.id,
+      });
+    }
   }
 }
 
