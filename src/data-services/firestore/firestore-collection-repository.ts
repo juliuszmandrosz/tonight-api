@@ -4,6 +4,8 @@ import {
   DocumentSnapshot,
   Transaction,
   QuerySnapshot,
+  WhereFilterOp,
+  QueryConstraint,
   runTransaction,
   deleteDoc,
   setDoc,
@@ -16,6 +18,7 @@ import {
   updateDoc,
 } from 'firebase/firestore/lite';
 import { BaseEntity } from '@core/base-entity';
+import { getResultFromQuery } from '@data-services/firestore/firestore-utils';
 
 export class FirestoreCollectionRepository<T extends BaseEntity> {
   constructor(private firestore: Firestore, private collectionName: string) {}
@@ -45,8 +48,12 @@ export class FirestoreCollectionRepository<T extends BaseEntity> {
 
   async findOneByField(fieldName: string, value: string): Promise<T | null> {
     const q = await this.findDocumentsByField(fieldName, value);
-    if (q.docs.length === 0) return null;
-    return q.docs[0].data() as T;
+    return getResultFromQuery<T>(q);
+  }
+
+  async findOneByParams(params: QueryParam[]): Promise<T | null> {
+    const q = await this.findDocumentsByParams(params);
+    return getResultFromQuery<T>(q);
   }
 
   runTransaction(
@@ -77,4 +84,22 @@ export class FirestoreCollectionRepository<T extends BaseEntity> {
 
     return getDocs(q);
   }
+
+  private findDocumentsByParams(params: QueryParam[]): Promise<QuerySnapshot> {
+    const col = collection(this.firestore, this.collectionName);
+    const constraints: QueryConstraint[] = [];
+    for (const param of params) {
+      constraints.push(
+        where(param.fieldName, param.operator, param.fieldValue),
+      );
+    }
+    const q = query(col, ...constraints);
+    return getDocs(q);
+  }
+}
+
+interface QueryParam {
+  fieldName: string;
+  fieldValue: any;
+  operator: WhereFilterOp;
 }
