@@ -13,6 +13,9 @@ import { Ticket } from '@payments/entities/ticket.entity';
 import { VipPaymentSession } from '@payments/entities/vip-payment-session.entity';
 import { Partner } from '@auth/entities/partner.entity';
 import { PartnerAccessCode } from '@auth/entities/partner-access-code.entity';
+import { SelectorAccessCode } from '@auth/entities/selector-access-code.entity';
+import { Selector } from '@auth/entities/selector.entity';
+import { ClubSelector } from '@auth/entities/club-selector.entity';
 
 @Injectable()
 export class FirestoreDataService implements OnApplicationBootstrap {
@@ -25,7 +28,10 @@ export class FirestoreDataService implements OnApplicationBootstrap {
   tickets: FirestoreSubcollectionRepository<Ticket>;
   vipPaymentSessions: FirestoreCollectionRepository<VipPaymentSession>;
   partners: FirestoreCollectionRepository<Partner>;
-  partnerAccessCodes: FirestoreCollectionRepository<PartnerAccessCode>;
+  partnersAccessCodes: FirestoreCollectionRepository<PartnerAccessCode>;
+  selectorsAccessCodes: FirestoreCollectionRepository<SelectorAccessCode>;
+  selectors: FirestoreCollectionRepository<Selector>;
+  clubSelectors: FirestoreSubcollectionRepository<ClubSelector>;
 
   constructor(
     @Inject(FirestoreDatabaseProvider) private firestore: Firestore,
@@ -82,10 +88,27 @@ export class FirestoreDataService implements OnApplicationBootstrap {
       Partner.collectionName,
     );
 
-    this.partnerAccessCodes =
+    this.partnersAccessCodes =
       new FirestoreCollectionRepository<PartnerAccessCode>(
         this.firestore,
         PartnerAccessCode.collectionName,
       );
+
+    this.selectorsAccessCodes =
+      new FirestoreCollectionRepository<SelectorAccessCode>(
+        this.firestore,
+        SelectorAccessCode.collectionName,
+      );
+
+    this.selectors = new FirestoreCollectionRepository<Selector>(
+      this.firestore,
+      Selector.collectionName,
+    );
+
+    this.clubSelectors = new FirestoreSubcollectionRepository<ClubSelector>(
+      this.firestore,
+      ClubSelector.parentCollectionName,
+      ClubSelector.subCollectionName,
+    );
   }
 }
