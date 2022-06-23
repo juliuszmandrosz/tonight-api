@@ -4,12 +4,14 @@ import { AuthService } from '@auth/auth.service';
 import { AddUserDto } from '@auth/dtos/add-user.dto';
 import { CheckIfPartnerCanSignUpDto } from '@auth/dtos/check-if-partner-can-sign-up.dto';
 import { AddPartnerDto } from '@auth/dtos/add-partner.dto';
+import { CheckIfSelectorCanSignUpDto } from '@auth/dtos/check-if-selector-can-sign-up.dto';
+import { AddSelectorDto } from '@auth/dtos/add-selector.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Post('checkUserClaim')
+  @Post('checkIfUserCanSignIn')
   checkUserClaim(@Body() dto: CheckClaimDto): Promise<void> {
     return this.authService.checkIfUserCanSignIn(dto);
   }
@@ -34,5 +36,22 @@ export class AuthController {
   @Post('addPartner')
   addPartner(@Body() dto: AddPartnerDto): Promise<void> {
     return this.authService.addPartner(dto);
+  }
+
+  @Post('checkIfSelectorCanSignIn')
+  checkIfSelectorCanSignIn(@Body() dto: CheckClaimDto): Promise<void> {
+    return this.authService.checkIfSelectorCanSignIn(dto);
+  }
+
+  @Post('checkIfSelectorCanSignUp')
+  checkIfSelectorCanSignUp(
+    @Body() dto: CheckIfSelectorCanSignUpDto,
+  ): Promise<void> {
+    return this.authService.checkIfSelectorCanSignUp(dto);
+  }
+
+  @Post('addSelector')
+  addSelector(@Body() dto: AddSelectorDto): Promise<void> {
+    return this.authService.addSelector(dto);
   }
 }

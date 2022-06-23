@@ -14,6 +14,12 @@ import Timestamp = firestore.Timestamp;
 import { CheckIfPartnerCanSignUpDto } from '@auth/dtos/check-if-partner-can-sign-up.dto';
 import { AddPartnerDto } from '@auth/dtos/add-partner.dto';
 import { Partner } from '@auth/entities/partner.entity';
+import { PartnerAccessCode } from '@auth/entities/partner-access-code.entity';
+import { SelectorAccessCode } from '@auth/entities/selector-access-code.entity';
+import { AddSelectorDto } from '@auth/dtos/add-selector.dto';
+import { Selector } from '@auth/entities/selector.entity';
+import { ClubSelector } from '@auth/entities/club-selector.entity';
+import { CheckIfSelectorCanSignUpDto } from '@auth/dtos/check-if-selector-can-sign-up.dto';
 
 @Injectable()
 export class AuthService {
@@ -49,6 +55,26 @@ export class AuthService {
     }
 
     await this.checkPartnerAccessCode(dto.accessCode);
+  }
+
+  async checkIfSelectorCanSignIn(dto: CheckClaimDto) {
+    const account = await this.checkIfAccountExists(dto.email);
+
+    if (!account) {
+      const response: AuthFailure = 'not-found';
+      throw new HttpException(response, HttpStatus.NOT_FOUND);
+    }
+
+    await this.checkSelectorClaim(dto.email);
+  }
+
+  async checkIfSelectorCanSignUp(dto: CheckIfSelectorCanSignUpDto) {
+    if (await this.checkIfAccountExists(dto.email)) {
+      const response: AuthFailure = 'already-exists';
+      throw new HttpException(response, HttpStatus.CONFLICT);
+    }
+
+    await this.checkSelectorAccessCode(dto.accessCode);
   }
 
   async addUser(dto: AddUserDto) {
@@ -102,6 +128,33 @@ export class AuthService {
       accountId: dto.partnerId,
       locale: dto.locale,
     });
+  }
+
+  async addSelector(dto: AddSelectorDto) {
+    const selector = await this.firestoreDataService.selectors.findById(
+      dto.selectorId,
+    );
+
+    if (selector) {
+      const response: AuthFailure = 'already-exists';
+      throw new HttpException(response, HttpStatus.CONFLICT);
+    }
+
+    const accessCode = await this.useSelectorAccessCode(dto.accessCode);
+
+    await this.firestoreDataService.clubSelectors.create(
+      accessCode.clubId,
+      dto.selectorId,
+      new ClubSelector({ email: dto.email.toLowerCase() }),
+    );
+
+    await this.firestoreDataService.selectors.create(
+      dto.selectorId,
+      new Selector({
+        email: dto.email.toLowerCase(),
+        clubId: accessCode.clubId,
+      }),
+    );
   }
 
   private async checkIfAccountExists(email: string) {
@@ -161,18 +214,41 @@ export class AuthService {
     }
   }
 
+  private async checkSelectorClaim(email: string) {
+    const selector = await this.firestoreDataService.selectors.findOneByField(
+      'email',
+      email.toLowerCase(),
+    );
+
+    if (!selector) {
+      const response: AuthFailure = 'permission-denied';
+      throw new HttpException(response, HttpStatus.FORBIDDEN);
+    }
+  }
+
   private async checkPartnerAccessCode(code: string) {
     const accessCode =
-      await this.firestoreDataService.partnerAccessCodes.findById(code);
+      await this.firestoreDataService.partnersAccessCodes.findById(code);
 
-    if (!accessCode) {
+    AuthService.checkIfAccessCodeIsValid(accessCode);
+  }
+
+  private async checkSelectorAccessCode(code: string) {
+    const accessCode =
+      await this.firestoreDataService.selectorsAccessCodes.findById(code);
+
+    AuthService.checkIfAccessCodeIsValid(accessCode);
+  }
+
+  private static checkIfAccessCodeIsValid(
+    code: PartnerAccessCode | SelectorAccessCode,
+  ) {
+    if (!code) {
       const response: AuthFailure = 'invalid-access-code';
       throw new HttpException(response, HttpStatus.NOT_FOUND);
     }
 
-    if (
-      Timestamp.now().toMillis() >= accessCode.expirationDateTime.toMillis()
-    ) {
+    if (Timestamp.now().toMillis() >= code.expirationDateTime.toMillis()) {
       const response: AuthFailure = 'invalid-access-code';
       throw new HttpException(response, HttpStatus.GONE);
     }
@@ -180,14 +256,28 @@ export class AuthService {
 
   private async usePartnerAccessCode(code: string) {
     const accessCode =
-      await this.firestoreDataService.partnerAccessCodes.findById(code);
+      await this.firestoreDataService.partnersAccessCodes.findById(code);
 
     if (!accessCode) {
       const response: AuthFailure = 'invalid-access-code';
       throw new HttpException(response, HttpStatus.NOT_FOUND);
     }
 
-    await this.firestoreDataService.partnerAccessCodes.delete(code);
+    await this.firestoreDataService.partnersAccessCodes.delete(code);
+
+    return accessCode;
+  }
+
+  private async useSelectorAccessCode(code: string) {
+    const accessCode =
+      await this.firestoreDataService.selectorsAccessCodes.findById(code);
+
+    if (!accessCode) {
+      const response: AuthFailure = 'invalid-access-code';
+      throw new HttpException(response, HttpStatus.NOT_FOUND);
+    }
+
+    await this.firestoreDataService.selectorsAccessCodes.delete(code);
 
     return accessCode;
   }
