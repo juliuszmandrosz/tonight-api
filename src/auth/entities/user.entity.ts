@@ -32,4 +32,8 @@ export class User implements BaseEntity {
   @IsNotEmpty()
   /// key - clubId, value - number of entries
   attendance: { [key: string]: number };
+
+  @IsString()
+  @IsNotEmpty()
+  locale: string;
 }

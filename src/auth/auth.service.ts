@@ -93,6 +93,7 @@ export class AuthService {
         favoriteEventIds: [],
         favoriteClubIds: [],
         attendance: {},
+        locale: dto.locale,
       }),
     );
 
