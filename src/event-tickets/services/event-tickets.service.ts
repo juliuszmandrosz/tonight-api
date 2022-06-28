@@ -5,6 +5,8 @@ import { Event } from '@events/event.entity';
 import { EventTickets } from '@event-tickets/entities/event-tickets.entity';
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
 import { toJson } from '@core/json-utils';
+import { Transaction } from 'firebase/firestore/lite';
+import { EventFailure } from '@events/event-failure.type';
 
 @Injectable()
 export class EventTicketsService {
@@ -76,17 +78,11 @@ export class EventTicketsService {
             event.id,
           );
 
-        const eventTickets =
-          await this.firestoreDataService.eventTickets.findById(
-            event.clubId,
-            event.id,
-            transaction,
-          );
-
-        if (!eventTickets) {
-          const response = 'invalid-event-tickets';
-          throw new HttpException(response, HttpStatus.NOT_FOUND);
-        }
+        const eventTickets = await this.tryGetEventTickets({
+          eventId: event.id,
+          clubId: event.clubId,
+          transaction,
+        });
 
         this.ticketSalesService.reduceTicketSalesBySingleTransaction({
           canceledAmount,
@@ -106,9 +102,31 @@ export class EventTicketsService {
   }
 
   async getVipPrice(clubId: string, eventId: string) {
+    const eventTickets = await this.tryGetEventTickets({ eventId, clubId });
+
+    return this.ticketPoolsService.getVipPriceFromCurrentPool(
+      eventTickets.ticketPools,
+    );
+  }
+
+  async checkIfEventIsSoldOut(clubId: string, eventId: string) {
+    const eventTickets = await this.tryGetEventTickets({ eventId, clubId });
+
+    if (eventTickets.isSoldOut) {
+      const response: EventFailure = 'event-sold-out';
+      throw new HttpException(response, HttpStatus.GONE);
+    }
+  }
+
+  private async tryGetEventTickets({
+    clubId,
+    eventId,
+    transaction,
+  }: TryGetEventTicketsParams) {
     const eventTickets = await this.firestoreDataService.eventTickets.findById(
       clubId,
       eventId,
+      transaction,
     );
 
     if (!eventTickets) {
@@ -116,10 +134,14 @@ export class EventTicketsService {
       throw new HttpException(response, HttpStatus.NOT_FOUND);
     }
 
-    return this.ticketPoolsService.getVipPriceFromCurrentPool(
-      eventTickets.ticketPools,
-    );
+    return eventTickets;
   }
+}
+
+interface TryGetEventTicketsParams {
+  clubId: string;
+  eventId: string;
+  transaction?: Transaction;
 }
 
 interface UpdateEventTicketsOnCancelReservationParams {

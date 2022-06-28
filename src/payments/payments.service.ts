@@ -35,6 +35,11 @@ export class PaymentsService {
 
     await this.cancelExistingPaymentSession(dto.eventId, dto.userId);
 
+    await this.eventTicketsService.checkIfEventIsSoldOut(
+      event.clubId,
+      event.id,
+    );
+
     const vipPrice = dto.isVip
       ? await this.eventTicketsService.getVipPrice(event.clubId, event.id)
       : 0;
