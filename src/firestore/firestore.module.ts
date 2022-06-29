@@ -5,11 +5,11 @@ import {
   FirestoreDatabaseProvider,
   FirestoreOptionsProvider,
 } from './firestore-providers';
-import { getFirestore } from 'firebase/firestore/lite';
-import { initializeApp } from 'firebase/app';
+import { initializeApp } from 'firebase-admin/app';
 import { AppConfigService } from '@config/app-config.service';
 import { FirestoreConfig } from '@config/config-template';
-import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 type FirestoreModuleOptions = {
   imports: any[];
