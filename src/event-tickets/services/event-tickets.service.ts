@@ -5,8 +5,8 @@ import { Event } from '@events/event.entity';
 import { EventTickets } from '@event-tickets/entities/event-tickets.entity';
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
 import { toJson } from '@core/json-utils';
-import { Transaction } from 'firebase/firestore/lite';
 import { EventFailure } from '@events/event-failure.type';
+import { Transaction } from 'firebase-admin/firestore';
 
 @Injectable()
 export class EventTicketsService {

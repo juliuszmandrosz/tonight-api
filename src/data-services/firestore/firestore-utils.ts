@@ -1,6 +1,7 @@
-import { QuerySnapshot } from 'firebase/firestore/lite';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { BaseEntity } from '@core/base-entity';
+import { firestore } from 'firebase-admin';
+import QuerySnapshot = firestore.QuerySnapshot;
 
 export function getResultFromQuery<T extends BaseEntity>(q: QuerySnapshot) {
   if (q.docs.length === 0) return null;
