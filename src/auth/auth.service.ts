@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { FirestoreAuthProvider } from '@firestore/firestore-providers';
 import { CheckClaimDto } from '@auth/dtos/check-claim.dto';
-import { Auth, fetchSignInMethodsForEmail } from 'firebase/auth';
+import { Auth } from 'firebase-admin/auth';
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
 import { AddUserDto } from '@auth/dtos/add-user.dto';
 import { User } from '@auth/entities/user.entity';
@@ -159,12 +159,12 @@ export class AuthService {
   }
 
   private async checkIfAccountExists(email: string) {
-    const providers = await fetchSignInMethodsForEmail(
-      this.firebaseAuth,
-      email.toLowerCase(),
-    );
-
-    return providers.length > 0;
+    try {
+      await this.firebaseAuth.getUserByEmail(email.toLowerCase());
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private async addStripeCustomer({

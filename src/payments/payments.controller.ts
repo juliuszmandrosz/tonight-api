@@ -1,14 +1,16 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { CreateTicketPaymentSheetDto } from '@payments/dtos/create-ticket-payment-sheet.dto';
 import { PaymentsService } from '@payments/payments.service';
 import { PaymentSheet } from '@payments/interfaces/payment.sheet.interface';
 import { CreateVipPaymentSheetDto } from '@payments/dtos/create-vip-payment-sheet.dto';
 import { CancelTicketReservationDto } from '@payments/dtos/cancel-ticket-reservation.dto';
+import { FirebaseAuthGuard } from '@core/firebase-auth.guard';
 
 @Controller('payments')
 export class PaymentsController {
   constructor(private paymentService: PaymentsService) {}
 
+  @UseGuards(FirebaseAuthGuard)
   @Post('createTicketPaymentSheet')
   createTicketPaymentSheet(
     @Body() dto: CreateTicketPaymentSheetDto,
@@ -16,6 +18,7 @@ export class PaymentsController {
     return this.paymentService.createTicketPaymentSheet(dto);
   }
 
+  @UseGuards(FirebaseAuthGuard)
   @Post('createVipPaymentSheet')
   createVipPaymentSheet(
     @Body() dto: CreateVipPaymentSheetDto,
@@ -23,6 +26,7 @@ export class PaymentsController {
     return this.paymentService.createVipPaymentSheet(dto);
   }
 
+  @UseGuards(FirebaseAuthGuard)
   @Post('cancelTicketReservation')
   cancelTicketReservation(
     @Body() dto: CancelTicketReservationDto,

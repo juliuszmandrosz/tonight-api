@@ -1,46 +1,33 @@
-import {
-  Firestore,
-  DocumentReference,
-  DocumentSnapshot,
-  Transaction,
-  QuerySnapshot,
-  WhereFilterOp,
-  QueryConstraint,
-  runTransaction,
-  deleteDoc,
-  setDoc,
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-} from 'firebase/firestore/lite';
 import { BaseEntity } from '@core/base-entity';
 import { getResultFromQuery } from '@data-services/firestore/firestore-utils';
+import {
+  Firestore,
+  WhereFilterOp,
+  Transaction,
+  DocumentReference,
+  QuerySnapshot,
+  DocumentSnapshot,
+  Query,
+} from 'firebase-admin/firestore';
 
 export class FirestoreCollectionRepository<T extends BaseEntity> {
   constructor(private firestore: Firestore, private collectionName: string) {}
 
   async create(id: string, item: T): Promise<void> {
-    await setDoc(this.findReferenceById(id), JSON.parse(JSON.stringify(item)));
+    await this.findReferenceById(id).set(JSON.parse(JSON.stringify(item)));
   }
 
   async update(id: string, item: T): Promise<void> {
-    await updateDoc(
-      this.findReferenceById(id),
-      JSON.parse(JSON.stringify(item)),
-    );
+    await this.findReferenceById(id).update(JSON.parse(JSON.stringify(item)));
   }
 
   async delete(id: string): Promise<void> {
-    await deleteDoc(this.findReferenceById(id));
+    await this.findReferenceById(id).delete();
   }
 
   async findById(id: string, transaction?: Transaction): Promise<T | null> {
     const document = await this.findDocumentById(id, transaction);
-    if (!document.exists()) return null;
+    if (!document.exists) return null;
     const data = document.data() as T;
     data.id = id;
     return data;
@@ -59,12 +46,11 @@ export class FirestoreCollectionRepository<T extends BaseEntity> {
   runTransaction(
     updateFunction: (transaction: Transaction) => Promise<any>,
   ): Promise<any> {
-    return runTransaction(this.firestore, updateFunction);
+    return this.firestore.runTransaction(updateFunction);
   }
 
   findReferenceById(id: string): DocumentReference {
-    const col = collection(this.firestore, this.collectionName);
-    return doc(col, id);
+    return this.firestore.collection(this.collectionName).doc(id);
   }
 
   private findDocumentById(
@@ -72,29 +58,28 @@ export class FirestoreCollectionRepository<T extends BaseEntity> {
     transaction?: Transaction,
   ): Promise<DocumentSnapshot> {
     const ref = this.findReferenceById(id);
-    return transaction ? transaction.get(ref) : getDoc(ref);
+    return transaction ? transaction.get(ref) : ref.get();
   }
 
   private findDocumentsByField(
     fieldName: string,
     value: string,
   ): Promise<QuerySnapshot> {
-    const col = collection(this.firestore, this.collectionName);
-    const q = query(col, where(fieldName, '==', value));
-
-    return getDocs(q);
+    const q = this.firestore
+      .collection(this.collectionName)
+      .where(fieldName, '==', value);
+    return q.get();
   }
 
   private findDocumentsByParams(params: QueryParam[]): Promise<QuerySnapshot> {
-    const col = collection(this.firestore, this.collectionName);
-    const constraints: QueryConstraint[] = [];
+    let query: Query;
     for (const param of params) {
-      constraints.push(
-        where(param.fieldName, param.operator, param.fieldValue),
-      );
+      query = this.firestore
+        .collection(this.collectionName)
+        .where(param.fieldName, param.operator, param.fieldValue);
     }
-    const q = query(col, ...constraints);
-    return getDocs(q);
+
+    return query.get();
   }
 }
 

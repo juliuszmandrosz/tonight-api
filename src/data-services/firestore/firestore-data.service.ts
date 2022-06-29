@@ -2,7 +2,6 @@ import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { Event } from '@events/event.entity';
 import { StripeCustomer } from '@payments/entities/stripe-customer.entity';
 import { TicketPaymentSession } from '@payments/entities/ticket-payment-session.entity';
-import { Firestore } from 'firebase/firestore/lite';
 import { EventTickets } from '@event-tickets/entities/event-tickets.entity';
 import { FirestoreSubcollectionRepository } from './firestore-subcollection-repository';
 import { PromotionCode } from '@payments/entities/promotion-code.entity';
@@ -16,6 +15,7 @@ import { PartnerAccessCode } from '@auth/entities/partner-access-code.entity';
 import { SelectorAccessCode } from '@auth/entities/selector-access-code.entity';
 import { Selector } from '@auth/entities/selector.entity';
 import { ClubSelector } from '@auth/entities/club-selector.entity';
+import { Firestore } from 'firebase-admin/firestore';
 
 @Injectable()
 export class FirestoreDataService implements OnApplicationBootstrap {
