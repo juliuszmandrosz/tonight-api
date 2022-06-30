@@ -20,6 +20,7 @@ import { AddSelectorDto } from '@auth/dtos/add-selector.dto';
 import { Selector } from '@auth/entities/selector.entity';
 import { ClubSelector } from '@auth/entities/club-selector.entity';
 import { CheckIfSelectorCanSignUpDto } from '@auth/dtos/check-if-selector-can-sign-up.dto';
+import { CustomClaims } from '@auth/interfaces/custom-claims.interface';
 
 @Injectable()
 export class AuthService {
@@ -102,6 +103,10 @@ export class AuthService {
       accountId: dto.userId,
       locale: dto.locale,
     });
+
+    await this.firebaseAuth.setCustomUserClaims(dto.userId, {
+      isUser: true,
+    } as CustomClaims);
   }
 
   async addPartner(dto: AddPartnerDto) {
@@ -129,6 +134,10 @@ export class AuthService {
       accountId: dto.partnerId,
       locale: dto.locale,
     });
+
+    await this.firebaseAuth.setCustomUserClaims(dto.partnerId, {
+      isPartner: true,
+    } as CustomClaims);
   }
 
   async addSelector(dto: AddSelectorDto) {
@@ -156,6 +165,10 @@ export class AuthService {
         clubId: accessCode.clubId,
       }),
     );
+
+    await this.firebaseAuth.setCustomUserClaims(dto.selectorId, {
+      isSelector: true,
+    } as CustomClaims);
   }
 
   private async checkIfAccountExists(email: string) {
@@ -192,36 +205,27 @@ export class AuthService {
   }
 
   private async checkPartnerClaim(email: string) {
-    const partner = await this.firestoreDataService.partners.findOneByField(
-      'email',
-      email.toLowerCase(),
-    );
+    const claims = await this.getAccountClaims(email);
 
-    if (!partner) {
+    if (!claims?.isPartner) {
       const response: AuthFailure = 'permission-denied';
       throw new HttpException(response, HttpStatus.FORBIDDEN);
     }
   }
 
   private async checkUserClaim(email: string) {
-    const user = await this.firestoreDataService.users.findOneByField(
-      'email',
-      email.toLowerCase(),
-    );
+    const claims = await this.getAccountClaims(email);
 
-    if (!user) {
+    if (!claims?.isUser) {
       const response: AuthFailure = 'permission-denied';
       throw new HttpException(response, HttpStatus.FORBIDDEN);
     }
   }
 
   private async checkSelectorClaim(email: string) {
-    const selector = await this.firestoreDataService.selectors.findOneByField(
-      'email',
-      email.toLowerCase(),
-    );
+    const claims = await this.getAccountClaims(email);
 
-    if (!selector) {
+    if (!claims?.isSelector) {
       const response: AuthFailure = 'permission-denied';
       throw new HttpException(response, HttpStatus.FORBIDDEN);
     }
@@ -281,6 +285,12 @@ export class AuthService {
     await this.firestoreDataService.selectorsAccessCodes.delete(code);
 
     return accessCode;
+  }
+
+  private async getAccountClaims(email: string) {
+    const userRecord = await this.firebaseAuth.getUserByEmail(email);
+
+    return userRecord.customClaims as CustomClaims;
   }
 }
 
