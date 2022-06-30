@@ -6,11 +6,11 @@ import { CreateVipPaymentSheetDto } from '@payments/dtos/create-vip-payment-shee
 import { CancelTicketReservationDto } from '@payments/dtos/cancel-ticket-reservation.dto';
 import { FirebaseAuthGuard } from '@core/firebase-auth.guard';
 
+@UseGuards(FirebaseAuthGuard)
 @Controller('payments')
 export class PaymentsController {
   constructor(private paymentService: PaymentsService) {}
 
-  @UseGuards(FirebaseAuthGuard)
   @Post('createTicketPaymentSheet')
   createTicketPaymentSheet(
     @Body() dto: CreateTicketPaymentSheetDto,
@@ -18,7 +18,6 @@ export class PaymentsController {
     return this.paymentService.createTicketPaymentSheet(dto);
   }
 
-  @UseGuards(FirebaseAuthGuard)
   @Post('createVipPaymentSheet')
   createVipPaymentSheet(
     @Body() dto: CreateVipPaymentSheetDto,
@@ -26,7 +25,6 @@ export class PaymentsController {
     return this.paymentService.createVipPaymentSheet(dto);
   }
 
-  @UseGuards(FirebaseAuthGuard)
   @Post('cancelTicketReservation')
   cancelTicketReservation(
     @Body() dto: CancelTicketReservationDto,
