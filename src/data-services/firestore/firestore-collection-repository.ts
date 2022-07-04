@@ -9,16 +9,17 @@ import {
   DocumentSnapshot,
   Query,
 } from 'firebase-admin/firestore';
+import { toJson } from '@core/json-utils';
 
 export class FirestoreCollectionRepository<T extends BaseEntity> {
   constructor(private firestore: Firestore, private collectionName: string) {}
 
   async create(id: string, item: T): Promise<void> {
-    await this.findReferenceById(id).set(JSON.parse(JSON.stringify(item)));
+    await this.findReferenceById(id).set(toJson<T>(item));
   }
 
   async update(id: string, item: T): Promise<void> {
-    await this.findReferenceById(id).update(JSON.parse(JSON.stringify(item)));
+    await this.findReferenceById(id).update(toJson<T>(item));
   }
 
   async delete(id: string): Promise<void> {
