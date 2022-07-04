@@ -1,5 +1,6 @@
 import { Module, DynamicModule } from '@nestjs/common';
 import {
+  FirestoreAppCheckProvider,
   FirestoreAppProvider,
   FirestoreAuthProvider,
   FirestoreDatabaseProvider,
@@ -10,6 +11,7 @@ import { AppConfigService } from '@config/app-config.service';
 import { FirestoreConfig } from '@config/config-template';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
+import { getAppCheck } from 'firebase-admin/app-check';
 
 type FirestoreModuleOptions = {
   imports: any[];
@@ -43,12 +45,24 @@ export class FirestoreModule {
       useFactory: (app) => getAuth(app),
       inject: [FirestoreAppProvider],
     };
+
+    const appCheckProvider = {
+      provide: FirestoreAppCheckProvider,
+      useFactory: (app) => getAppCheck(app),
+      inject: [FirestoreAppProvider],
+    };
     return {
       global: true,
       module: FirestoreModule,
       imports: options.imports,
-      providers: [optionsProvider, dbProvider, appProvider, authProvider],
-      exports: [dbProvider, appProvider, authProvider],
+      providers: [
+        optionsProvider,
+        dbProvider,
+        appProvider,
+        authProvider,
+        appCheckProvider,
+      ],
+      exports: [dbProvider, appProvider, authProvider, appCheckProvider],
     };
   }
 }

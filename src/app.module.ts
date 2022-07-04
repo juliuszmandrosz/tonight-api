@@ -14,6 +14,8 @@ import { AppConfigService } from '@config/app-config.service';
 import { CoreModule } from '@core/core.module';
 import { CloudTasksModule } from '@cloud-tasks/cloud-tasks.module';
 import { AuthModule } from '@auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { FirebaseAppCheckGuard } from '@core/firebase-app-check.guard';
 
 @Module({
   imports: [
@@ -49,6 +51,12 @@ import { AuthModule } from '@auth/auth.module';
     CoreModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: FirebaseAppCheckGuard,
+    },
+  ],
 })
 export class AppModule {}
