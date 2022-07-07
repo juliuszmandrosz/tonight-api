@@ -38,3 +38,4 @@ lerna-debug.log*
 /src/config/.dev.env
 /raver-dev-key.json
 /.env
+/tonight-api.json

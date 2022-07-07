@@ -2,9 +2,9 @@ import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { CheckClaimDto } from '@auth/dtos/check-claim.dto';
 import { AuthService } from '@auth/auth.service';
 import { AddUserDto } from '@auth/dtos/add-user.dto';
-import { CheckIfPartnerCanSignUpDto } from '@auth/dtos/check-if-partner-can-sign-up.dto';
+import { CheckIfPartnerCanSignInDto } from '@auth/dtos/check-if-partner-can-sign-in.dto';
 import { AddPartnerDto } from '@auth/dtos/add-partner.dto';
-import { CheckIfSelectorCanSignUpDto } from '@auth/dtos/check-if-selector-can-sign-up.dto';
+import { CheckIfSelectorCanSignInDto } from '@auth/dtos/check-if-selector-can-sign-in.dto';
 import { AddSelectorDto } from '@auth/dtos/add-selector.dto';
 import { FirebaseAuthGuard } from '@core/firebase-auth.guard';
 
@@ -24,15 +24,10 @@ export class AuthController {
   }
 
   @Post('checkIfPartnerCanSignIn')
-  checkIfPartnerCanSignIn(@Body() dto: CheckClaimDto): Promise<void> {
-    return this.authService.checkIfPartnerCanSignIn(dto);
-  }
-
-  @Post('checkIfPartnerCanSignUp')
-  checkIfPartnerCanSignUp(
-    @Body() dto: CheckIfPartnerCanSignUpDto,
+  checkIfPartnerCanSignIn(
+    @Body() dto: CheckIfPartnerCanSignInDto,
   ): Promise<void> {
-    return this.authService.checkIfPartnerCanSignUp(dto);
+    return this.authService.checkIfPartnerCanSignIn(dto);
   }
 
   @UseGuards(FirebaseAuthGuard)
@@ -42,15 +37,10 @@ export class AuthController {
   }
 
   @Post('checkIfSelectorCanSignIn')
-  checkIfSelectorCanSignIn(@Body() dto: CheckClaimDto): Promise<void> {
-    return this.authService.checkIfSelectorCanSignIn(dto);
-  }
-
-  @Post('checkIfSelectorCanSignUp')
-  checkIfSelectorCanSignUp(
-    @Body() dto: CheckIfSelectorCanSignUpDto,
+  checkIfSelectorCanSignIn(
+    @Body() dto: CheckIfSelectorCanSignInDto,
   ): Promise<void> {
-    return this.authService.checkIfSelectorCanSignUp(dto);
+    return this.authService.checkIfSelectorCanSignIn(dto);
   }
 
   @UseGuards(FirebaseAuthGuard)
