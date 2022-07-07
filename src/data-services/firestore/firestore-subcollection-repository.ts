@@ -6,6 +6,8 @@ import {
   DocumentSnapshot,
   DocumentReference,
 } from 'firebase-admin/firestore';
+import { QuerySnapshot } from 'firebase-admin/lib/firestore';
+import { getResultFromQuery } from '@data-services/firestore/firestore-utils';
 
 export class FirestoreSubcollectionRepository<T extends BaseEntity> {
   constructor(
@@ -34,6 +36,15 @@ export class FirestoreSubcollectionRepository<T extends BaseEntity> {
     return data;
   }
 
+  async findOneByField(
+    parentId: string,
+    fieldName: string,
+    value: string,
+  ): Promise<T | null> {
+    const q = await this.findDocumentsByField(parentId, fieldName, value);
+    return getResultFromQuery<T>(q);
+  }
+
   findDocumentById(
     parentId: string,
     id: string,
@@ -41,6 +52,19 @@ export class FirestoreSubcollectionRepository<T extends BaseEntity> {
   ): Promise<DocumentSnapshot> {
     const ref = this.findReferenceById(parentId, id);
     return transaction ? transaction.get(ref) : ref.get();
+  }
+
+  private findDocumentsByField(
+    parentId: string,
+    fieldName: string,
+    value: string,
+  ): Promise<QuerySnapshot> {
+    const q = this.firestore
+      .collection(this.parentCollection)
+      .doc(parentId)
+      .collection(this.subCollection)
+      .where(fieldName, '==', value);
+    return q.get();
   }
 
   findReferenceById(parentId: string, id: string): DocumentReference {

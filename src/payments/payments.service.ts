@@ -33,6 +33,8 @@ export class PaymentsService {
   ): Promise<PaymentSheet> {
     const event = await this.eventService.checkIfEventIsActive(dto.eventId);
 
+    await this.checkIfUserAlreadyHasTicketForEvent(dto.userId, dto.eventId);
+
     await this.cancelExistingPaymentSession(dto.eventId, dto.userId);
 
     await this.eventTicketsService.checkIfEventIsSoldOut(
@@ -381,6 +383,23 @@ export class PaymentsService {
       await this.cancelTicketReservation({
         ticketPaymentSessionId: existingTicketPaymentSession.id,
       });
+    }
+  }
+
+  private async checkIfUserAlreadyHasTicketForEvent(
+    userId: string,
+    eventId: string,
+  ) {
+    const existingTicket =
+      await this.firestoreDataService.tickets.findOneByField(
+        userId,
+        'eventId',
+        eventId,
+      );
+
+    if (existingTicket) {
+      const response: PaymentFailure = 'user-already-has-ticket';
+      throw new HttpException(response, HttpStatus.CONFLICT);
     }
   }
 }
