@@ -11,7 +11,7 @@ import { StripeCustomer } from '@payments/entities/stripe-customer.entity';
 import { AuthFailure } from '@auth/types/auth.failure.type';
 import { firestore } from 'firebase-admin';
 import Timestamp = firestore.Timestamp;
-import { CheckIfPartnerCanSignUpDto } from '@auth/dtos/check-if-partner-can-sign-up.dto';
+import { CheckIfPartnerCanSignInDto } from '@auth/dtos/check-if-partner-can-sign-in.dto';
 import { AddPartnerDto } from '@auth/dtos/add-partner.dto';
 import { Partner } from '@auth/entities/partner.entity';
 import { PartnerAccessCode } from '@auth/entities/partner-access-code.entity';
@@ -19,7 +19,7 @@ import { SelectorAccessCode } from '@auth/entities/selector-access-code.entity';
 import { AddSelectorDto } from '@auth/dtos/add-selector.dto';
 import { Selector } from '@auth/entities/selector.entity';
 import { ClubSelector } from '@auth/entities/club-selector.entity';
-import { CheckIfSelectorCanSignUpDto } from '@auth/dtos/check-if-selector-can-sign-up.dto';
+import { CheckIfSelectorCanSignInDto } from '@auth/dtos/check-if-selector-can-sign-in.dto';
 import { CustomClaims } from '@auth/interfaces/custom-claims.interface';
 
 @Injectable()
@@ -38,41 +38,33 @@ export class AuthService {
     await this.checkUserClaim(dto.email);
   }
 
-  async checkIfPartnerCanSignIn(dto: CheckClaimDto) {
+  async checkIfPartnerCanSignIn(dto: CheckIfPartnerCanSignInDto) {
     const account = await this.checkIfAccountExists(dto.email);
 
-    if (!account) {
-      const response: AuthFailure = 'not-found';
-      throw new HttpException(response, HttpStatus.NOT_FOUND);
+    if (account) {
+      await this.checkPartnerClaim(dto.email);
+      return;
     }
 
-    await this.checkPartnerClaim(dto.email);
-  }
-
-  async checkIfPartnerCanSignUp(dto: CheckIfPartnerCanSignUpDto) {
-    if (await this.checkIfAccountExists(dto.email)) {
-      const response: AuthFailure = 'already-exists';
-      throw new HttpException(response, HttpStatus.CONFLICT);
+    if (!dto.accessCode) {
+      const response: AuthFailure = 'not-found';
+      throw new HttpException(response, HttpStatus.NOT_FOUND);
     }
 
     await this.checkPartnerAccessCode(dto.accessCode);
   }
 
-  async checkIfSelectorCanSignIn(dto: CheckClaimDto) {
+  async checkIfSelectorCanSignIn(dto: CheckIfSelectorCanSignInDto) {
     const account = await this.checkIfAccountExists(dto.email);
 
-    if (!account) {
-      const response: AuthFailure = 'not-found';
-      throw new HttpException(response, HttpStatus.NOT_FOUND);
+    if (account) {
+      await this.checkSelectorClaim(dto.email);
+      return;
     }
 
-    await this.checkSelectorClaim(dto.email);
-  }
-
-  async checkIfSelectorCanSignUp(dto: CheckIfSelectorCanSignUpDto) {
-    if (await this.checkIfAccountExists(dto.email)) {
-      const response: AuthFailure = 'already-exists';
-      throw new HttpException(response, HttpStatus.CONFLICT);
+    if (!dto.accessCode) {
+      const response: AuthFailure = 'not-found';
+      throw new HttpException(response, HttpStatus.NOT_FOUND);
     }
 
     await this.checkSelectorAccessCode(dto.accessCode);
