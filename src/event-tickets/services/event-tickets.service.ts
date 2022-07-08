@@ -2,9 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { TicketPoolsService } from '@event-tickets/services/ticket-pools.service';
 import { TicketSalesService } from '@event-tickets/services/ticket-sales.service';
 import { Event } from '@events/event.entity';
-import { EventTickets } from '@event-tickets/entities/event-tickets.entity';
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
-import { toJson } from '@core/json-utils';
 import { EventFailure } from '@events/event-failure.type';
 import { Transaction } from 'firebase-admin/firestore';
 
@@ -55,7 +53,7 @@ export class EventTicketsService {
 
         this.ticketPoolsService.updateTicketPoolsOnTicketPayment(eventTickets);
 
-        transaction.update(eventTicketsRef, toJson<EventTickets>(eventTickets));
+        transaction.update(eventTicketsRef, eventTickets);
 
         return this.ticketPoolsService.getCurrentOrLastPool(
           eventTickets.ticketPools,
@@ -92,7 +90,7 @@ export class EventTicketsService {
 
         this.ticketPoolsService.revertSingleTicketFromPools(eventTickets);
 
-        transaction.update(eventTicketsRef, toJson<EventTickets>(eventTickets));
+        transaction.update(eventTicketsRef, eventTickets);
 
         return this.ticketPoolsService.getCurrentOrLastPool(
           eventTickets.ticketPools,
