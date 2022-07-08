@@ -391,11 +391,18 @@ export class PaymentsService {
     eventId: string,
   ) {
     const existingTicket =
-      await this.firestoreDataService.tickets.findOneByField(
-        userId,
-        'eventId',
-        eventId,
-      );
+      await this.firestoreDataService.tickets.findOneByParams(userId, [
+        {
+          fieldName: 'eventId',
+          operator: '==',
+          fieldValue: eventId,
+        },
+        {
+          fieldName: 'isReturned',
+          operator: '==',
+          fieldValue: false,
+        },
+      ]);
 
     if (existingTicket) {
       const response: PaymentFailure = 'user-already-has-ticket';
