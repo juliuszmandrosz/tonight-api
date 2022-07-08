@@ -2,13 +2,13 @@ import { BaseEntity } from '@core/base-entity';
 import { getResultFromQuery } from '@data-services/firestore/firestore-utils';
 import {
   Firestore,
-  WhereFilterOp,
   Transaction,
   DocumentReference,
   QuerySnapshot,
   DocumentSnapshot,
   Query,
 } from 'firebase-admin/firestore';
+import { QueryParam } from '@data-services/firestore/query-param.interface';
 
 export class FirestoreCollectionRepository<T extends BaseEntity> {
   constructor(private firestore: Firestore, private collectionName: string) {}
@@ -81,10 +81,4 @@ export class FirestoreCollectionRepository<T extends BaseEntity> {
 
     return query.get();
   }
-}
-
-interface QueryParam {
-  fieldName: string;
-  fieldValue: any;
-  operator: WhereFilterOp;
 }

@@ -5,8 +5,9 @@ import {
   DocumentSnapshot,
   DocumentReference,
 } from 'firebase-admin/firestore';
-import { QuerySnapshot } from 'firebase-admin/lib/firestore';
+import { Query, QuerySnapshot } from 'firebase-admin/lib/firestore';
 import { getResultFromQuery } from '@data-services/firestore/firestore-utils';
+import { QueryParam } from '@data-services/firestore/query-param.interface';
 
 export class FirestoreSubcollectionRepository<T extends BaseEntity> {
   constructor(
@@ -44,6 +45,14 @@ export class FirestoreSubcollectionRepository<T extends BaseEntity> {
     return getResultFromQuery<T>(q);
   }
 
+  async findOneByParams(
+    parentId: string,
+    params: QueryParam[],
+  ): Promise<T | null> {
+    const q = await this.findDocumentsByParams(parentId, params);
+    return getResultFromQuery<T>(q);
+  }
+
   findDocumentById(
     parentId: string,
     id: string,
@@ -64,6 +73,22 @@ export class FirestoreSubcollectionRepository<T extends BaseEntity> {
       .collection(this.subCollection)
       .where(fieldName, '==', value);
     return q.get();
+  }
+
+  private findDocumentsByParams(
+    parentId: string,
+    params: QueryParam[],
+  ): Promise<QuerySnapshot> {
+    let query: Query;
+    for (const param of params) {
+      query = this.firestore
+        .collection(this.parentCollection)
+        .doc(parentId)
+        .collection(this.subCollection)
+        .where(param.fieldName, param.operator, param.fieldValue);
+    }
+
+    return query.get();
   }
 
   findReferenceById(parentId: string, id: string): DocumentReference {
