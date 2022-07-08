@@ -16,7 +16,7 @@ export class FirestoreSubcollectionRepository<T extends BaseEntity> {
   ) {}
 
   async create(parentId: string, id: string, item: T): Promise<void> {
-    await this.findReferenceById(parentId, id).set(item);
+    await this.findReferenceById(parentId, id).set({ ...item });
   }
 
   async delete(parentId: string, id: string): Promise<void> {

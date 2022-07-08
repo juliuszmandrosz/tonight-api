@@ -14,11 +14,11 @@ export class FirestoreCollectionRepository<T extends BaseEntity> {
   constructor(private firestore: Firestore, private collectionName: string) {}
 
   async create(id: string, item: T): Promise<void> {
-    await this.findReferenceById(id).set(item);
+    await this.findReferenceById(id).set({ ...item });
   }
 
   async update(id: string, item: T): Promise<void> {
-    await this.findReferenceById(id).update(item);
+    await this.findReferenceById(id).update({ ...item });
   }
 
   async delete(id: string): Promise<void> {
