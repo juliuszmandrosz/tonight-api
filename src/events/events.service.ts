@@ -1,7 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
-import { toJson } from '@core/json-utils';
-import { Event } from '@events/event.entity';
 import { EventFailure } from '@events/event-failure.type';
 import { firestore } from 'firebase-admin';
 import Timestamp = firestore.Timestamp;
@@ -56,7 +54,7 @@ export class EventsService {
         event.attending++;
         event.price = price;
 
-        transaction.update(ref, toJson<Event>(event));
+        transaction.update(ref, event);
       },
     );
   }
@@ -81,7 +79,7 @@ export class EventsService {
         event.attending--;
         event.price = price;
 
-        transaction.update(ref, toJson<Event>(event));
+        transaction.update(ref, event);
       },
     );
   }
