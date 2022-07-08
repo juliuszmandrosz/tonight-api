@@ -1,5 +1,4 @@
 import { BaseEntity } from '@core/base-entity';
-import { toJson } from '@core/json-utils';
 import {
   Firestore,
   Transaction,
@@ -17,7 +16,7 @@ export class FirestoreSubcollectionRepository<T extends BaseEntity> {
   ) {}
 
   async create(parentId: string, id: string, item: T): Promise<void> {
-    await this.findReferenceById(parentId, id).set(toJson<T>(item));
+    await this.findReferenceById(parentId, id).set(item);
   }
 
   async delete(parentId: string, id: string): Promise<void> {
