@@ -53,7 +53,7 @@ export class EventTicketsService {
 
         this.ticketPoolsService.updateTicketPoolsOnTicketPayment(eventTickets);
 
-        transaction.update(eventTicketsRef, eventTickets);
+        transaction.update(eventTicketsRef, { ...eventTickets });
 
         return this.ticketPoolsService.getCurrentOrLastPool(
           eventTickets.ticketPools,
@@ -90,7 +90,7 @@ export class EventTicketsService {
 
         this.ticketPoolsService.revertSingleTicketFromPools(eventTickets);
 
-        transaction.update(eventTicketsRef, eventTickets);
+        transaction.update(eventTicketsRef, { ...eventTickets });
 
         return this.ticketPoolsService.getCurrentOrLastPool(
           eventTickets.ticketPools,

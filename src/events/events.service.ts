@@ -54,7 +54,7 @@ export class EventsService {
         event.attending++;
         event.price = price;
 
-        transaction.update(ref, event);
+        transaction.update(ref, { ...event });
       },
     );
   }
@@ -79,7 +79,7 @@ export class EventsService {
         event.attending--;
         event.price = price;
 
-        transaction.update(ref, event);
+        transaction.update(ref, { ...event });
       },
     );
   }
