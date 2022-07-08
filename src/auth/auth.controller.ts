@@ -7,6 +7,7 @@ import { AddPartnerDto } from '@auth/dtos/add-partner.dto';
 import { CheckIfSelectorCanSignInDto } from '@auth/dtos/check-if-selector-can-sign-in.dto';
 import { AddSelectorDto } from '@auth/dtos/add-selector.dto';
 import { FirebaseAuthGuard } from '@core/firebase-auth.guard';
+import { DeleteAccountDto } from '@auth/dtos/delete-account.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -47,5 +48,11 @@ export class AuthController {
   @Post('addSelector')
   addSelector(@Body() dto: AddSelectorDto): Promise<void> {
     return this.authService.addSelector(dto);
+  }
+
+  @UseGuards(FirebaseAuthGuard)
+  @Post('deleteAccount')
+  deleteAccount(@Body() dto: DeleteAccountDto): Promise<void> {
+    return this.authService.deleteAccount(dto);
   }
 }

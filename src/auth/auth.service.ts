@@ -21,6 +21,7 @@ import { Selector } from '@auth/entities/selector.entity';
 import { ClubSelector } from '@auth/entities/club-selector.entity';
 import { CheckIfSelectorCanSignInDto } from '@auth/dtos/check-if-selector-can-sign-in.dto';
 import { CustomClaims } from '@auth/interfaces/custom-claims.interface';
+import { DeleteAccountDto } from '@auth/dtos/delete-account.dto';
 
 @Injectable()
 export class AuthService {
@@ -161,6 +162,15 @@ export class AuthService {
     await this.firebaseAuth.setCustomUserClaims(dto.selectorId, {
       isSelector: true,
     } as CustomClaims);
+  }
+
+  async deleteAccount(dto: DeleteAccountDto) {
+    const account = await this.checkIfAccountExists(dto.email);
+    if (!account) {
+      const response: AuthFailure = 'not-found';
+      throw new HttpException(response, HttpStatus.NOT_ACCEPTABLE);
+    }
+    await this.firebaseAuth.deleteUser(dto.accountId);
   }
 
   private async checkIfAccountExists(email: string) {
