@@ -79,15 +79,14 @@ export class FirestoreSubcollectionRepository<T extends BaseEntity> {
     parentId: string,
     params: QueryParam[],
   ): Promise<QuerySnapshot> {
-    let query: Query;
-    for (const param of params) {
-      query = this.firestore
-        .collection(this.parentCollection)
-        .doc(parentId)
-        .collection(this.subCollection)
-        .where(param.fieldName, param.operator, param.fieldValue);
-    }
+    let query: Query = this.firestore
+      .collection(this.parentCollection)
+      .doc(parentId)
+      .collection(this.subCollection);
 
+    for (const param of params) {
+      query = query.where(param.fieldName, param.operator, param.fieldValue);
+    }
     return query.get();
   }
 

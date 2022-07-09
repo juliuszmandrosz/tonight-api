@@ -72,13 +72,10 @@ export class FirestoreCollectionRepository<T extends BaseEntity> {
   }
 
   private findDocumentsByParams(params: QueryParam[]): Promise<QuerySnapshot> {
-    let query: Query;
+    let query: Query = this.firestore.collection(this.collectionName);
     for (const param of params) {
-      query = this.firestore
-        .collection(this.collectionName)
-        .where(param.fieldName, param.operator, param.fieldValue);
+      query = query.where(param.fieldName, param.operator, param.fieldValue);
     }
-
     return query.get();
   }
 }
