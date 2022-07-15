@@ -228,6 +228,18 @@ export class PaymentsService {
     );
   }
 
+  getServiceFee() {
+    return this.appConfigService.getServiceFee();
+  }
+
+  getNormalEventFee() {
+    return this.appConfigService.getNormalEventFee();
+  }
+
+  getExclusiveEventFee() {
+    return this.appConfigService.getExclusiveEventFee();
+  }
+
   private async getPromotionCode(
     userId: string,
     code: string,

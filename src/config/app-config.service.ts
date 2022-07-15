@@ -7,7 +7,9 @@ import {
 } from '@config/config-template';
 import {
   cloudFunctions,
+  exclusiveEventFee,
   firestore,
+  normalEventFee,
   port,
   serviceFee,
   stripe,
@@ -23,6 +25,14 @@ export class AppConfigService {
 
   getServiceFee() {
     return this.configService.get<number>(serviceFee);
+  }
+
+  getNormalEventFee() {
+    return this.configService.get<number>(normalEventFee);
+  }
+
+  getExclusiveEventFee() {
+    return this.configService.get<number>(exclusiveEventFee);
   }
 
   getCloudFunctionsConfig() {

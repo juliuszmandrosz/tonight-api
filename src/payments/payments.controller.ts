@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { CreateTicketPaymentSheetDto } from '@payments/dtos/create-ticket-payment-sheet.dto';
 import { PaymentsService } from '@payments/payments.service';
 import { PaymentSheet } from '@payments/interfaces/payment.sheet.interface';
@@ -30,5 +30,20 @@ export class PaymentsController {
     @Body() dto: CancelTicketReservationDto,
   ): Promise<void> {
     return this.paymentService.cancelTicketReservation(dto);
+  }
+
+  @Get('getServiceFee')
+  getServiceFee(): number {
+    return this.paymentService.getServiceFee();
+  }
+
+  @Get('getNormalEventFee')
+  getNormalEventFee(): number {
+    return this.paymentService.getNormalEventFee();
+  }
+
+  @Get('getExclusiveEventFee')
+  getExclusiveEventFee(): number {
+    return this.paymentService.getExclusiveEventFee();
   }
 }
