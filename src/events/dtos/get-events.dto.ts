@@ -1,20 +1,3 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { QueryDto } from '@core/query.dto';
 
-export class GetEventsDto {
-  @IsString()
-  query: string;
-
-  @IsString()
-  filterBy: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  pageNumber: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  pageSize: number;
-
-  @IsString()
-  sortBy: string;
-}
+export class GetEventsDto extends QueryDto {}
