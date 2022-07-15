@@ -4,6 +4,7 @@ import {
   CloudFunctionsConfig,
   FirestoreConfig,
   StripeConfig,
+  TypesenseConfig,
 } from '@config/config-template';
 import {
   cloudFunctions,
@@ -13,6 +14,7 @@ import {
   port,
   serviceFee,
   stripe,
+  typesense,
 } from '@config/config-keys';
 
 @Injectable()
@@ -45,5 +47,9 @@ export class AppConfigService {
 
   getStripeConfig() {
     return this.configService.get<StripeConfig>(stripe);
+  }
+
+  getTypesenseConfig() {
+    return this.configService.get<TypesenseConfig>(typesense);
   }
 }
