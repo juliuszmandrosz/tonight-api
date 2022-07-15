@@ -16,6 +16,7 @@ import { CloudTasksModule } from '@cloud-tasks/cloud-tasks.module';
 import { AuthModule } from '@auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { FirebaseAppCheckGuard } from '@core/firebase-app-check.guard';
+import { TypesenseModule } from '@typesense/typesense.module';
 
 @Module({
   imports: [
@@ -23,6 +24,13 @@ import { FirebaseAppCheckGuard } from '@core/firebase-app-check.guard';
       isGlobal: true,
       envFilePath: '.env',
       load: [config],
+    }),
+
+    TypesenseModule.forRoot({
+      imports: [AppConfigModule],
+      useFactory: (appConfigService: AppConfigService) =>
+        appConfigService.getTypesenseConfig(),
+      inject: [AppConfigService],
     }),
 
     FirestoreModule.forRoot({

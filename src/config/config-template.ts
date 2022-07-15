@@ -1,9 +1,12 @@
 export interface ConfigTemplate {
   port: number;
   serviceFee: number;
+  normalEventFee: number;
+  exclusiveEventFee: number;
   cloudFunctions: CloudFunctionsConfig;
   stripe: StripeConfig;
   firestore: FirestoreConfig;
+  typesense: TypesenseConfig;
 }
 
 export interface CloudFunctionsConfig {
@@ -24,4 +27,9 @@ export interface FirestoreConfig {
   messagingSenderId: string;
   appId: string;
   measurementId: string;
+}
+
+export interface TypesenseConfig {
+  apiKey: string;
+  clusterId: string;
 }

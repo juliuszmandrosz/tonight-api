@@ -3,10 +3,25 @@ import { FirestoreDataService } from '@data-services/firestore/firestore-data.se
 import { EventFailure } from '@events/event-failure.type';
 import { firestore } from 'firebase-admin';
 import Timestamp = firestore.Timestamp;
+import { TypesenseDataService } from '@data-services/typesense/typesense-data.service';
+import { GetEventsDto } from '@events/dtos/get-events.dto';
 
 @Injectable()
 export class EventsService {
-  constructor(private firestoreDataService: FirestoreDataService) {}
+  constructor(
+    private firestoreDataService: FirestoreDataService,
+    private typesenseDataService: TypesenseDataService,
+  ) {}
+
+  async getEvents(dto: GetEventsDto) {
+    return this.typesenseDataService.events.retrieve({
+      query: dto.query,
+      filterBy: dto.filterBy,
+      pageNumber: dto.pageNumber,
+      pageSize: dto.pageSize,
+      sortBy: dto.sortBy,
+    });
+  }
 
   async checkIfEventIsActive(eventId: string) {
     const event = await this.firestoreDataService.events.findById(eventId);
