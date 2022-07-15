@@ -51,6 +51,9 @@
       "@firestore/*": [
         "./firestore/*"
       ],
+      "@typesense/*": [
+        "./typesense/*"
+      ],
       "@cloud-tasks/*": [
         "./cloud-tasks/*"
       ]

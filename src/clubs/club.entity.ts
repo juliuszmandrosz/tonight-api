@@ -3,6 +3,8 @@ import { BaseEntity } from '@core/base-entity';
 import { v1 } from 'uuid';
 
 export class Club implements BaseEntity {
+  static collectionName = 'clubs';
+
   @IsNotEmpty()
   @IsString()
   @IsOptional()
