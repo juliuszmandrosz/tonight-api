@@ -16,6 +16,7 @@ import { CancelTicketReservationDto } from '@payments/dtos/cancel-ticket-reserva
 import { CreateVipPaymentSheetDto } from '@payments/dtos/create-vip-payment-sheet.dto';
 import { VipPaymentSession } from '@payments/entities/vip-payment-session.entity';
 import { EventFailure } from '@events/event-failure.type';
+import { EventFees } from '@payments/interfaces/event-fees.interface';
 
 @Injectable()
 export class PaymentsService {
@@ -232,12 +233,10 @@ export class PaymentsService {
     return this.appConfigService.getServiceFee();
   }
 
-  getNormalEventFee() {
-    return this.appConfigService.getNormalEventFee();
-  }
-
-  getExclusiveEventFee() {
-    return this.appConfigService.getExclusiveEventFee();
+  getEventFees(): EventFees {
+    const normalEventFee = this.appConfigService.getNormalEventFee();
+    const exclusiveEventFee = this.appConfigService.getExclusiveEventFee();
+    return { normal: normalEventFee, exclusive: exclusiveEventFee };
   }
 
   private async getPromotionCode(
