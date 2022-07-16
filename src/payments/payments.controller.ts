@@ -5,6 +5,7 @@ import { PaymentSheet } from '@payments/interfaces/payment.sheet.interface';
 import { CreateVipPaymentSheetDto } from '@payments/dtos/create-vip-payment-sheet.dto';
 import { CancelTicketReservationDto } from '@payments/dtos/cancel-ticket-reservation.dto';
 import { FirebaseAuthGuard } from '@core/firebase-auth.guard';
+import { EventFees } from '@payments/interfaces/event-fees.interface';
 
 @UseGuards(FirebaseAuthGuard)
 @Controller('payments')
@@ -37,13 +38,8 @@ export class PaymentsController {
     return this.paymentService.getServiceFee();
   }
 
-  @Get('getNormalEventFee')
-  getNormalEventFee(): number {
-    return this.paymentService.getNormalEventFee();
-  }
-
-  @Get('getExclusiveEventFee')
-  getExclusiveEventFee(): number {
-    return this.paymentService.getExclusiveEventFee();
+  @Get('getEventFees')
+  getEventFees(): EventFees {
+    return this.paymentService.getEventFees();
   }
 }
