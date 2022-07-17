@@ -7,6 +7,7 @@ export interface ConfigTemplate {
   stripe: StripeConfig;
   firestore: FirestoreConfig;
   typesense: TypesenseConfig;
+  googlePlaces: GooglePlacesConfig;
 }
 
 export interface CloudFunctionsConfig {
@@ -32,4 +33,8 @@ export interface FirestoreConfig {
 export interface TypesenseConfig {
   apiKey: string;
   clusterId: string;
+}
+
+export interface GooglePlacesConfig {
+  apiKey: string;
 }
