@@ -17,6 +17,7 @@ import { AuthModule } from '@auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { FirebaseAppCheckGuard } from '@core/firebase-app-check.guard';
 import { TypesenseModule } from '@typesense/typesense.module';
+import { GooglePlacesModule } from '@google-places/google-places.module';
 
 @Module({
   imports: [
@@ -37,6 +38,13 @@ import { TypesenseModule } from '@typesense/typesense.module';
       imports: [AppConfigModule],
       useFactory: (appConfigService: AppConfigService) =>
         appConfigService.getFirestoreConfig(),
+      inject: [AppConfigService],
+    }),
+
+    GooglePlacesModule.forRoot({
+      imports: [AppConfigModule],
+      useFactory: (appConfigService: AppConfigService) =>
+        appConfigService.getGooglePlacesConfig(),
       inject: [AppConfigService],
     }),
 

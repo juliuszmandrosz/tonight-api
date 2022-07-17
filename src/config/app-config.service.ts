@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   CloudFunctionsConfig,
   FirestoreConfig,
+  GooglePlacesConfig,
   StripeConfig,
   TypesenseConfig,
 } from '@config/config-template';
@@ -10,6 +11,7 @@ import {
   cloudFunctions,
   exclusiveEventFee,
   firestore,
+  googlePlaces,
   normalEventFee,
   port,
   serviceFee,
@@ -51,5 +53,9 @@ export class AppConfigService {
 
   getTypesenseConfig() {
     return this.configService.get<TypesenseConfig>(typesense);
+  }
+
+  getGooglePlacesConfig() {
+    return this.configService.get<GooglePlacesConfig>(googlePlaces);
   }
 }
