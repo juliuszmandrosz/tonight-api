@@ -11,16 +11,26 @@ export class GooglePlacesService {
   ) {}
 
   async getCities(dto: GetCitiesDto): Promise<City[]> {
-    const result = await this.googlePlaces.autocomplete({
-      input: dto.query,
-      types: ['(cities)'],
-      language: dto.locale,
-      components: 'country:pl',
-    });
+    let cities: City[] = [];
 
-    return result.predictions.map((place) => ({
-      id: place.place_id,
-      name: place.description.split(',')[0],
-    }));
+    try {
+      const result = await this.googlePlaces.autocomplete({
+        input: dto.query,
+        types: ['(cities)'],
+        language: dto.locale,
+        components: 'country:pl',
+      });
+
+      cities = result.predictions.map((place) => ({
+        id: place.place_id,
+        name: place.description.split(',')[0],
+      }));
+    } catch (e) {
+      if (e instanceof Error && e.message === 'ZERO_RESULTS') {
+        return [];
+      }
+    }
+
+    return cities;
   }
 }
