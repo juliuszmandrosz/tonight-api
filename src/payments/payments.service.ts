@@ -1,11 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { EventsService } from '@events/events.service';
 import { PaymentSheet } from '@payments/interfaces/payment.sheet.interface';
-import { CreateTicketPaymentSheetDto } from '@payments/dtos/create-ticket-payment-sheet.dto';
 import { EventTicketsService } from '@event-tickets/services/event-tickets.service';
 import { PromotionCode } from '@payments/entities/promotion-code.entity';
 import { Stripe } from 'stripe';
-import { InjectStripe } from 'nestjs-stripe';
 import { apiVersion } from '@constants/stripe-constants';
 import { TicketPaymentSession } from '@payments/entities/ticket-payment-session.entity';
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
@@ -17,6 +15,8 @@ import { CreateVipPaymentSheetDto } from '@payments/dtos/create-vip-payment-shee
 import { VipPaymentSession } from '@payments/entities/vip-payment-session.entity';
 import { EventFailure } from '@events/event-failure.type';
 import { EventFees } from '@payments/interfaces/event-fees.interface';
+import { StripeProvider } from '../stripe/stripe-providers';
+import { CreateTicketPaymentSheetDto } from '@payments/dtos/create-ticket-payment-sheet.dto';
 
 @Injectable()
 export class PaymentsService {
@@ -26,7 +26,7 @@ export class PaymentsService {
     private firestoreDataService: FirestoreDataService,
     private appConfigService: AppConfigService,
     private cloudTasksService: CloudTasksService,
-    @InjectStripe() private stripe: Stripe,
+    @Inject(StripeProvider) private stripe: Stripe,
   ) {}
 
   async createTicketPaymentSheet(
@@ -291,7 +291,10 @@ export class PaymentsService {
     const ephemeralKeySecret = await this.tryCreateEphemeralKey(
       stripeCustomer.customerId,
     );
-    const paymentMethodTypes = PaymentsService.getPaymentMethodTypes(currency);
+    const paymentMethodTypes = PaymentsService.getPaymentMethodTypes(
+      currency,
+      stripeCustomer.paymentMethod,
+    );
     const paymentIntentAmount = PaymentsService.getPaymentIntentAmount(amount);
 
     const paymentIntent = await this.stripe.paymentIntents.create({
@@ -354,12 +357,23 @@ export class PaymentsService {
     return Math.round(amount * 100);
   }
 
-  private static getPaymentMethodTypes(currency: string) {
-    if (currency.toUpperCase() === 'PLN' || currency.toUpperCase() === 'EUR') {
+  private static getPaymentMethodTypes(
+    currency: string,
+    customerPaymentMethod?: string,
+  ): Stripe.Checkout.SessionCreateParams.PaymentMethodType[] {
+    if (customerPaymentMethod === 'card') {
+      return ['card'];
+    }
+
+    if (PaymentsService.isSupportedCurrencyForP24(currency)) {
       return ['card', 'p24'];
     }
 
     return ['card'];
+  }
+
+  private static isSupportedCurrencyForP24(currency: string) {
+    return currency.toUpperCase() === 'PLN' || currency.toUpperCase() === 'EUR';
   }
 
   private async tryCreateEphemeralKey(customerId: string): Promise<string> {

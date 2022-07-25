@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import { StripeModule } from 'nestjs-stripe';
 import { PaymentsModule } from '@payments/payments.module';
 import { ClubsModule } from '@clubs/clubs.module';
 import { EventsModule } from '@events/events.module';
@@ -18,6 +17,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { FirebaseAppCheckGuard } from '@core/firebase-app-check.guard';
 import { TypesenseModule } from '@typesense/typesense.module';
 import { GooglePlacesModule } from '@google-places/google-places.module';
+import { StripeModule } from './stripe/stripe.module';
 
 @Module({
   imports: [
@@ -48,7 +48,7 @@ import { GooglePlacesModule } from '@google-places/google-places.module';
       inject: [AppConfigService],
     }),
 
-    StripeModule.forRootAsync({
+    StripeModule.forRoot({
       imports: [AppConfigModule],
       useFactory: (appConfigService) => ({
         apiKey: appConfigService.getStripeConfig().apiKey,

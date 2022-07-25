@@ -34,4 +34,9 @@ export class StripeCustomer implements BaseEntity {
   @IsOptional()
   @IsNotEmpty()
   vatNumber?: string;
+
+  @IsString()
+  @IsOptional()
+  @IsNotEmpty()
+  paymentMethod?: string;
 }
