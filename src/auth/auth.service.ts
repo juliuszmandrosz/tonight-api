@@ -5,7 +5,6 @@ import { Auth } from 'firebase-admin/auth';
 import { FirestoreDataService } from '@data-services/firestore/firestore-data.service';
 import { AddUserDto } from '@auth/dtos/add-user.dto';
 import { User } from '@auth/entities/user.entity';
-import { InjectStripe } from 'nestjs-stripe';
 import { Stripe } from 'stripe';
 import { StripeCustomer } from '@payments/entities/stripe-customer.entity';
 import { AuthFailure } from '@auth/types/auth.failure.type';
@@ -22,12 +21,13 @@ import { ClubSelector } from '@auth/entities/club-selector.entity';
 import { CheckIfSelectorCanSignInDto } from '@auth/dtos/check-if-selector-can-sign-in.dto';
 import { CustomClaims } from '@auth/interfaces/custom-claims.interface';
 import { DeleteAccountDto } from '@auth/dtos/delete-account.dto';
+import { StripeProvider } from '../stripe/stripe-providers';
 
 @Injectable()
 export class AuthService {
   constructor(
     @Inject(FirestoreAuthProvider) private firebaseAuth: Auth,
-    @InjectStripe() private stripe: Stripe,
+    @Inject(StripeProvider) private stripe: Stripe,
     private firestoreDataService: FirestoreDataService,
   ) {}
 
