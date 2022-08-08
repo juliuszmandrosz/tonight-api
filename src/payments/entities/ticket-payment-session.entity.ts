@@ -77,4 +77,8 @@ export class TicketPaymentSession implements BaseEntity {
   @IsNumber()
   @IsOptional()
   promotionCodeAmountOff = 0;
+
+  @IsNumber()
+  @IsOptional()
+  ticketQuantity = 1;
 }
