@@ -16,6 +16,7 @@ export class EventsService {
   async getEvents(dto: GetEventsDto) {
     return this.typesenseDataService.events.retrieve({
       query: dto.query,
+      queryBy: dto.queryBy,
       filterBy: dto.filterBy,
       pageNumber: dto.pageNumber,
       pageSize: dto.pageSize,

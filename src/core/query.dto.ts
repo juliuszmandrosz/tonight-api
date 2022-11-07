@@ -5,6 +5,9 @@ export class QueryDto {
   query: string;
 
   @IsString()
+  queryBy: string;
+
+  @IsString()
   filterBy: string;
 
   @IsNumber()
