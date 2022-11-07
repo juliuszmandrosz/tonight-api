@@ -17,13 +17,13 @@ export class TypesenseDataService implements OnApplicationBootstrap {
     this.events = new TypesenseRepository<Event>({
       typesense: this.typesense,
       collectionName: Event.collectionName,
-      queryBy: 'eventName, artistName, clubName',
+      defaultQueryBy: 'eventName, artistName, clubName',
     });
 
     this.clubs = new TypesenseRepository<Club>({
       typesense: this.typesense,
       collectionName: Club.collectionName,
-      queryBy: 'clubName, locationString',
+      defaultQueryBy: 'clubName, locationString',
     });
   }
 }
