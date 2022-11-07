@@ -7,6 +7,7 @@ export class TypesenseRepository<T extends BaseEntity> {
 
   async retrieve({
     query,
+    queryBy,
     filterBy,
     pageNumber,
     pageSize,
@@ -17,7 +18,7 @@ export class TypesenseRepository<T extends BaseEntity> {
       .documents()
       .search({
         q: query,
-        query_by: this.params.queryBy,
+        query_by: queryBy ?? this.params.defaultQueryBy,
         filter_by: filterBy,
         page: pageNumber,
         per_page: pageSize,

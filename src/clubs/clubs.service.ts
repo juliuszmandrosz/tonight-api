@@ -9,6 +9,7 @@ export class ClubsService {
   async getClubs(dto: GetClubsDto) {
     return this.typesenseDataService.clubs.retrieve({
       query: dto.query,
+      queryBy: dto.queryBy,
       filterBy: dto.filterBy,
       pageNumber: dto.pageNumber,
       pageSize: dto.pageSize,
