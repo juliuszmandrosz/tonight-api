@@ -18,7 +18,7 @@ export class TypesenseRepository<T extends BaseEntity> {
       .documents()
       .search({
         q: query,
-        query_by: queryBy ?? this.params.defaultQueryBy,
+        query_by: queryBy ? queryBy : this.params.defaultQueryBy,
         filter_by: filterBy,
         page: pageNumber,
         per_page: pageSize,
