@@ -11,8 +11,6 @@ import { AppConfigService } from '@config/app-config.service';
 import { CoreModule } from '@core/core.module';
 import { CloudTasksModule } from '@cloud-tasks/cloud-tasks.module';
 import { AuthModule } from '@auth/auth.module';
-import { APP_GUARD } from '@nestjs/core';
-import { FirebaseAppCheckGuard } from '@core/firebase-app-check.guard';
 import { TypesenseModule } from '@typesense/typesense.module';
 import { GooglePlacesModule } from '@google-places/google-places.module';
 import { StripeModule } from './stripe/stripe.module';
@@ -63,12 +61,6 @@ import { StripeModule } from './stripe/stripe.module';
     EventsModule,
     EventTicketsModule,
     CoreModule,
-  ],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: FirebaseAppCheckGuard,
-    },
   ],
 })
 export class AppModule {}
