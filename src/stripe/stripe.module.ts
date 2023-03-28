@@ -22,7 +22,7 @@ export class StripeModule {
     const stripeProvider = {
       provide: StripeProvider,
       useFactory: (config: StripeConfig) =>
-        new Stripe(config.apiKey, { apiVersion: '2020-08-27' }),
+        new Stripe(config.apiKey, { apiVersion: '2022-11-15' }),
       inject: [StripeOptionsProvider],
     };
 

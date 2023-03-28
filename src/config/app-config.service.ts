@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   CloudFunctionsConfig,
   FirestoreConfig,
   GooglePlacesConfig,
+  RedisConfig,
   StripeConfig,
   TypesenseConfig,
 } from '@config/config-template';
@@ -14,6 +15,7 @@ import {
   googlePlaces,
   normalEventFee,
   port,
+  redis,
   serviceFee,
   stripe,
   typesense,
@@ -57,5 +59,10 @@ export class AppConfigService {
 
   getGooglePlacesConfig() {
     return this.configService.get<GooglePlacesConfig>(googlePlaces);
+  }
+
+  getRedisConfig() {
+    Logger.log(this.configService.get<RedisConfig>(redis));
+    return this.configService.get<RedisConfig>(redis);
   }
 }

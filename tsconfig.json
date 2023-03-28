@@ -59,6 +59,15 @@
       ],
       "@google-places/*": [
         "./google-places/*"
+      ],
+      "@tickets/*": [
+        "./tickets/*"
+      ],
+      "@users/*": [
+        "./users/*"
+      ],
+      "@decorators/*": [
+        "./decorators/*"
       ]
     }
   }

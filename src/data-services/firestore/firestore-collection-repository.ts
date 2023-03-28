@@ -1,12 +1,12 @@
 import { BaseEntity } from '@core/base-entity';
 import { getResultFromQuery } from '@data-services/firestore/firestore-utils';
 import {
-  Firestore,
-  Transaction,
   DocumentReference,
-  QuerySnapshot,
   DocumentSnapshot,
+  Firestore,
   Query,
+  QuerySnapshot,
+  Transaction,
 } from 'firebase-admin/firestore';
 import { QueryParam } from '@data-services/firestore/query-param.interface';
 
@@ -18,7 +18,7 @@ export class FirestoreCollectionRepository<T extends BaseEntity> {
   }
 
   async update(id: string, item: T): Promise<void> {
-    await this.findReferenceById(id).update({ ...item });
+    // await this.findReferenceById(id).update({ ...item });
   }
 
   async delete(id: string): Promise<void> {

@@ -1,0 +1,59 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateTicketInput {
+  price: Float!
+}
+
+input CreateUserInput {
+  email: String!
+}
+
+"""An arbitrary-precision Decimal type"""
+scalar Decimal
+
+type Mutation {
+  createTicket(createTicketInput: CreateTicketInput!): Ticket!
+  createUser(createUserInput: CreateUserInput!): User!
+  removeUser(id: String!): User!
+  updateTicket(updateTicketInput: UpdateTicketInput!): Ticket!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+}
+
+type Query {
+  tickets: [Ticket!]!
+  user(id: String!): User!
+  users: [User!]!
+}
+
+type Subscription {
+  ticketsUpdated: [Ticket!]!
+}
+
+type Ticket {
+  id: String!
+  isExpired: Boolean!
+  isReturnable: Boolean!
+  isReturned: Boolean!
+  isVip: Boolean!
+  price: Decimal!
+  user: User!
+  userId: String!
+}
+
+input UpdateTicketInput {
+  price: Float
+}
+
+input UpdateUserInput {
+  email: String
+}
+
+type User {
+  email: String!
+  id: String!
+  locale: String!
+  tickets: [Ticket!]!
+  username: String!
+}

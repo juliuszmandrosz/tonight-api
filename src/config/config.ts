@@ -1,24 +1,100 @@
-import { ConfigTemplate } from '@config/config-template';
+import { ConfigTemplate } from "@config/config-template";
 
+// PROD
+// export default () =>
+//   ({
+//     port: parseInt(process.env.PORT) || 3000,
+//     serviceFee: 0.04,
+//     normalEventFee: 0.08,
+//     exclusiveEventFee: 0.04,
+//     cloudFunctions: {
+//       location: 'europe-central2',
+//       endpoint: 'https://europe-central2-tonight-raver.cloudfunctions.net/',
+//     },
+//     stripe: {
+//       apiVersion: '2020-08-27',
+//       apiKey:
+//         'REDACTED',
+//     },
+//     firestore: {
+//       apiKey: 'REDACTED',
+//       authDomain: 'tonight-raver.firebaseapp.com',
+//       projectId: 'tonight-raver',
+//       storageBucket: 'tonight-raver.appspot.com',
+//       messagingSenderId: '98730591004',
+//       appId: '1:98730591004:web:c079dca8cd340444a0b0d9',
+//       measurementId: 'G-B56FR6HJF0',
+//     },
+//     typesense: {
+//       apiKey: 'REDACTED',
+//       clusterId: 't7uo1nq0adlipy32p-1.a1.typesense.net',
+//     },
+//     googlePlaces: {
+//       apiKey: 'REDACTED',
+//     },
+//   } as ConfigTemplate);
+
+//QA
+// export default () =>
+//   ({
+//     port: parseInt(process.env.PORT) || 3000,
+//     serviceFee: 0.04,
+//     normalEventFee: 0.08,
+//     exclusiveEventFee: 0.04,
+//     cloudFunctions: {
+//       location: 'europe-central2',
+//       endpoint: 'https://europe-central2-tonight-qa.cloudfunctions.net/',
+//     },
+//     stripe: {
+//       apiVersion: '2020-08-27',
+//       apiKey:
+//         'REDACTED',
+//     },
+//     firestore: {
+//       apiKey: 'REDACTED',
+//       authDomain: 'tonight-qa.firebaseapp.com',
+//       projectId: 'tonight-qa',
+//       storageBucket: 'tonight-qa.appspot.com',
+//       messagingSenderId: '860373834856',
+//       appId: '1:860373834856:web:230cdf369e3f2a34446fdd',
+//       measurementId: 'G-W8QFFD3LYT',
+//     },
+//   } as ConfigTemplate);
+
+// DEV
 export default () =>
   ({
     port: parseInt(process.env.PORT) || 3000,
-    serviceFee: parseFloat(process.env.SERVICE_FEE),
+    serviceFee: 0.04,
+    normalEventFee: 0.08,
+    exclusiveEventFee: 0.04,
     cloudFunctions: {
-      location: process.env.CLOUD_FUNCTIONS_LOCATION,
-      endpoint: process.env.CLOUD_FUNCTIONS_ENDPOINT,
+      location: 'europe-central2',
+      endpoint: 'https://europe-central2-raver-1fec4.cloudfunctions.net/',
     },
     stripe: {
-      apiVersion: process.env.STRIPE_API_VERSION,
-      apiKey: process.env.STRIPE_API_KEY,
+      apiVersion: '2020-08-27',
+      apiKey:
+        'REDACTED',
     },
     firestore: {
-      apiKey: process.env.FIRESTORE_API_KEY,
-      authDomain: process.env.FIRESTORE_AUTH_DOMAIN,
-      projectId: process.env.FIRESTORE_PROJECT_ID,
-      storageBucket: process.env.FIRESTORE_STORAGE_BUCKET,
-      messagingSenderId: process.env.FIRESTORE_MESSAGING_SENDER_ID,
-      appId: process.env.FIRESTORE_APP_ID,
-      measurementId: process.env.FIRESTORE_MEASUREMENT_ID,
+      apiKey: 'REDACTED',
+      authDomain: 'raver-1fec4.firebaseapp.com',
+      projectId: 'raver-1fec4',
+      storageBucket: 'raver-1fec4.appspot.com',
+      messagingSenderId: '133839090627',
+      appId: '1:133839090627:web:5d19c780f20b4f21e1c376',
+      measurementId: 'G-EWR90F10GE',
+    },
+    typesense: {
+      apiKey: 'REDACTED',
+      clusterId: '1l4qvzr2emg60kcyp-1.a1.typesense.net',
+    },
+    googlePlaces: {
+      apiKey: 'REDACTED',
+    },
+    redis: {
+      port: 6379,
+      host: 'localhost',
     },
   } as ConfigTemplate);

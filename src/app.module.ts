@@ -14,6 +14,9 @@ import { AuthModule } from '@auth/auth.module';
 import { TypesenseModule } from '@typesense/typesense.module';
 import { GooglePlacesModule } from '@google-places/google-places.module';
 import { StripeModule } from './stripe/stripe.module';
+import { GraphqlModule } from './graphql/graphql.module';
+import { UsersModule } from '@users/users.module';
+import { TicketsModule } from '@tickets/tickets.module';
 
 @Module({
   imports: [
@@ -53,6 +56,8 @@ import { StripeModule } from './stripe/stripe.module';
       inject: [AppConfigService],
     }),
 
+    GraphqlModule,
+
     CloudTasksModule.forRoot(),
 
     AuthModule,
@@ -61,6 +66,9 @@ import { StripeModule } from './stripe/stripe.module';
     EventsModule,
     EventTicketsModule,
     CoreModule,
+    // PubSubModule,
+    UsersModule,
+    TicketsModule,
   ],
 })
 export class AppModule {}

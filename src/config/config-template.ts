@@ -8,6 +8,7 @@ export interface ConfigTemplate {
   firestore: FirestoreConfig;
   typesense: TypesenseConfig;
   googlePlaces: GooglePlacesConfig;
+  redis: RedisConfig;
 }
 
 export interface CloudFunctionsConfig {
@@ -37,4 +38,10 @@ export interface TypesenseConfig {
 
 export interface GooglePlacesConfig {
   apiKey: string;
+}
+
+export interface RedisConfig {
+  host: string;
+
+  port: number;
 }
