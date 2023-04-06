@@ -1,5 +1,3 @@
 import { QueryDto } from '@core/query.dto';
 
-export class GetWallPhotosDto extends QueryDto {
-  clubIds: string[];
-}
+export class GetWallPhotosDto extends QueryDto {}
