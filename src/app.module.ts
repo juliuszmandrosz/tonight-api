@@ -14,6 +14,7 @@ import { AuthModule } from '@auth/auth.module';
 import { TypesenseModule } from '@typesense/typesense.module';
 import { GooglePlacesModule } from '@google-places/google-places.module';
 import { StripeModule } from './stripe/stripe.module';
+import { WallPhotosModule } from './wall_photos/wall-photos.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { StripeModule } from './stripe/stripe.module';
     EventsModule,
     EventTicketsModule,
     CoreModule,
+    WallPhotosModule,
   ],
 })
 export class AppModule {}
