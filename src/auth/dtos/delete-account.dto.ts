@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class DeleteAccountDto {
@@ -8,7 +8,7 @@ export class DeleteAccountDto {
   accountId: string;
 
   @IsEmail()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
   email: string;
 }

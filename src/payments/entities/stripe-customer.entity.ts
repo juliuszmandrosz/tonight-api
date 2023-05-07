@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { BaseEntity } from '@core/base-entity';
 
 export class StripeCustomer implements BaseEntity {
@@ -21,9 +21,15 @@ export class StripeCustomer implements BaseEntity {
   @IsNotEmpty()
   setupSecret: string;
 
-  @IsString()
+  @IsEmail()
+  @IsOptional()
   @IsNotEmpty()
-  email: string;
+  email?: string;
+
+  @IsString()
+  @IsOptional()
+  @IsNotEmpty()
+  phoneNumber?: string;
 
   @IsString()
   @IsOptional()
