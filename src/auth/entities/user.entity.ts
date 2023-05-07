@@ -1,4 +1,10 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { BaseEntity } from '@core/base-entity';
 
 export class User implements BaseEntity {
@@ -12,10 +18,6 @@ export class User implements BaseEntity {
   @IsNotEmpty()
   @IsOptional()
   id: string;
-
-  @IsString()
-  @IsNotEmpty()
-  email: string;
 
   @IsString()
   @IsNotEmpty()
@@ -36,4 +38,12 @@ export class User implements BaseEntity {
   @IsString()
   @IsNotEmpty()
   locale: string;
+
+  @IsEmail()
+  @IsOptional()
+  email?: string;
+
+  @IsString()
+  @IsOptional()
+  phoneNumber?: string;
 }

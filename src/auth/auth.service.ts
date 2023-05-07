@@ -9,7 +9,6 @@ import { Stripe } from 'stripe';
 import { StripeCustomer } from '@payments/entities/stripe-customer.entity';
 import { AuthFailure } from '@auth/types/auth.failure.type';
 import { firestore } from 'firebase-admin';
-import Timestamp = firestore.Timestamp;
 import { CheckIfPartnerCanSignInDto } from '@auth/dtos/check-if-partner-can-sign-in.dto';
 import { AddPartnerDto } from '@auth/dtos/add-partner.dto';
 import { Partner } from '@auth/entities/partner.entity';
@@ -22,6 +21,7 @@ import { CheckIfSelectorCanSignInDto } from '@auth/dtos/check-if-selector-can-si
 import { CustomClaims } from '@auth/interfaces/custom-claims.interface';
 import { DeleteAccountDto } from '@auth/dtos/delete-account.dto';
 import { StripeProvider } from '../stripe/stripe-providers';
+import Timestamp = firestore.Timestamp;
 
 @Injectable()
 export class AuthService {
@@ -32,7 +32,7 @@ export class AuthService {
   ) {}
 
   async checkIfUserCanSignIn(dto: CheckClaimDto) {
-    const account = await this.checkIfAccountExists(dto.email);
+    const account = await this.checkIfEmailExists(dto.email);
 
     if (!account) return;
 
@@ -40,7 +40,7 @@ export class AuthService {
   }
 
   async checkIfPartnerCanSignIn(dto: CheckIfPartnerCanSignInDto) {
-    const account = await this.checkIfAccountExists(dto.email);
+    const account = await this.checkIfEmailExists(dto.email);
 
     if (account) {
       await this.checkPartnerClaim(dto.email);
@@ -56,7 +56,7 @@ export class AuthService {
   }
 
   async checkIfSelectorCanSignIn(dto: CheckIfSelectorCanSignInDto) {
-    const account = await this.checkIfAccountExists(dto.email);
+    const account = await this.checkIfEmailExists(dto.email);
 
     if (account) {
       await this.checkSelectorClaim(dto.email);
@@ -82,7 +82,8 @@ export class AuthService {
     await this.firestoreDataService.users.create(
       dto.userId,
       new User({
-        email: dto.email.toLowerCase(),
+        email: dto.email ? dto.email.toLowerCase() : '',
+        phoneNumber: dto.phoneNumber ? dto.phoneNumber : '',
         username: '',
         favoriteEventIds: [],
         favoriteClubIds: [],
@@ -93,6 +94,7 @@ export class AuthService {
 
     await this.addStripeCustomer({
       email: dto.email,
+      phone: dto.phoneNumber,
       accountId: dto.userId,
       locale: dto.locale,
     });
@@ -165,7 +167,9 @@ export class AuthService {
   }
 
   async deleteAccount(dto: DeleteAccountDto) {
-    const account = await this.checkIfAccountExists(dto.email);
+    const account = dto.email
+      ? await this.checkIfEmailExists(dto.email)
+      : await this.checkIfUserExists(dto.accountId);
     if (!account) {
       const response: AuthFailure = 'not-found';
       throw new HttpException(response, HttpStatus.NOT_ACCEPTABLE);
@@ -173,9 +177,18 @@ export class AuthService {
     await this.firebaseAuth.deleteUser(dto.accountId);
   }
 
-  private async checkIfAccountExists(email: string) {
+  private async checkIfEmailExists(email: string) {
     try {
       await this.firebaseAuth.getUserByEmail(email.toLowerCase());
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private async checkIfUserExists(id: string) {
+    try {
+      await this.firebaseAuth.getUser(id);
       return true;
     } catch {
       return false;
@@ -185,10 +198,12 @@ export class AuthService {
   private async addStripeCustomer({
     accountId,
     email,
+    phone,
     locale,
   }: AddStripeCustomerParams) {
     const customer = await this.stripe.customers.create({
-      email: email.toLowerCase(),
+      email: email ? email.toLowerCase() : '',
+      phone: phone ? phone : '',
       preferred_locales: [locale],
     });
 
@@ -201,7 +216,8 @@ export class AuthService {
       new StripeCustomer({
         customerId: customer.id,
         setupSecret: intent.client_secret,
-        email,
+        email: email ? email.toLowerCase() : '',
+        phoneNumber: phone ? phone : '',
       }),
     );
   }
@@ -298,6 +314,7 @@ export class AuthService {
 
 interface AddStripeCustomerParams {
   accountId: string;
-  email: string;
   locale: string;
+  email?: string;
+  phone?: string;
 }
