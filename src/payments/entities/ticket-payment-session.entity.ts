@@ -7,8 +7,8 @@ import {
 } from 'class-validator';
 import { Stripe } from 'stripe';
 import { firestore } from 'firebase-admin';
-import Timestamp = firestore.Timestamp;
 import { BaseEntity } from '@core/base-entity';
+import Timestamp = firestore.Timestamp;
 
 export class TicketPaymentSession implements BaseEntity {
   static collectionName = 'ticketPaymentSessions';
@@ -32,18 +32,19 @@ export class TicketPaymentSession implements BaseEntity {
 
   @IsString()
   @IsNotEmpty()
+  connectedStripeAccountId: string;
+
+  @IsString()
+  @IsNotEmpty()
   eventId: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  ticketQuantity: number;
 
   @IsString()
   @IsNotEmpty()
   status: Stripe.PaymentIntent.Status;
-
-  @IsBoolean()
-  isVip: boolean;
-
-  @IsString()
-  @IsNotEmpty()
-  cancelTicketReservationTaskId: string;
 
   @IsBoolean()
   @IsOptional()
@@ -77,8 +78,4 @@ export class TicketPaymentSession implements BaseEntity {
   @IsNumber()
   @IsOptional()
   promotionCodeAmountOff = 0;
-
-  @IsNumber()
-  @IsOptional()
-  ticketQuantity = 1;
 }
