@@ -17,7 +17,7 @@ export class EventTicketsService {
   /// Returns ticket price after update
   async updateEventTicketsOnTicketPayment(
     event: Event,
-    isVip: boolean,
+    ticketQuantity: number,
   ): Promise<number> {
     return this.firestoreDataService.eventTickets.runTransaction(
       async (transaction) => {
@@ -39,16 +39,9 @@ export class EventTicketsService {
           throw new HttpException(response, HttpStatus.NOT_FOUND);
         }
 
-        const vipPrice = isVip
-          ? this.ticketPoolsService.getVipPriceFromCurrentPool(
-              eventTickets.ticketPools,
-            )
-          : 0;
-
         this.ticketSalesService.updateTicketSalesOnTicketPayment({
           ticketSales: eventTickets.ticketSales,
-          isVip,
-          revenue: event.price + vipPrice,
+          revenue: event.price * ticketQuantity,
         });
 
         this.ticketPoolsService.updateTicketPoolsOnTicketPayment(eventTickets);
@@ -99,17 +92,8 @@ export class EventTicketsService {
     );
   }
 
-  async getVipPrice(clubId: string, eventId: string) {
+  async checkIfTicketsAreAvailable(clubId: string, eventId: string) {
     const eventTickets = await this.tryGetEventTickets({ eventId, clubId });
-
-    return this.ticketPoolsService.getVipPriceFromCurrentPool(
-      eventTickets.ticketPools,
-    );
-  }
-
-  async checkIfEventIsSoldOut(clubId: string, eventId: string) {
-    const eventTickets = await this.tryGetEventTickets({ eventId, clubId });
-
     if (eventTickets.isSoldOut) {
       const response: EventFailure = 'event-sold-out';
       throw new HttpException(response, HttpStatus.GONE);

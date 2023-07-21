@@ -16,6 +16,7 @@ import { SelectorAccessCode } from '@auth/entities/selector-access-code.entity';
 import { Selector } from '@auth/entities/selector.entity';
 import { ClubSelector } from '@auth/entities/club-selector.entity';
 import { Firestore } from 'firebase-admin/firestore';
+import { Club } from '@clubs/club.entity';
 
 @Injectable()
 export class FirestoreDataService implements OnApplicationBootstrap {
@@ -32,6 +33,7 @@ export class FirestoreDataService implements OnApplicationBootstrap {
   selectorsAccessCodes: FirestoreCollectionRepository<SelectorAccessCode>;
   selectors: FirestoreCollectionRepository<Selector>;
   clubSelectors: FirestoreSubcollectionRepository<ClubSelector>;
+  clubs: FirestoreCollectionRepository<Club>;
 
   constructor(
     @Inject(FirestoreDatabaseProvider) private firestore: Firestore,
@@ -109,6 +111,11 @@ export class FirestoreDataService implements OnApplicationBootstrap {
       this.firestore,
       ClubSelector.parentCollectionName,
       ClubSelector.subCollectionName,
+    );
+
+    this.clubs = new FirestoreCollectionRepository<Club>(
+      this.firestore,
+      Club.collectionName,
     );
   }
 }
