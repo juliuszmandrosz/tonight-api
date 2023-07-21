@@ -97,4 +97,8 @@ export class Event implements BaseEntity {
   @IsBoolean()
   @IsOptional()
   isCanceled = false;
+
+  @IsString()
+  @IsOptional()
+  connectedStripeAccountId?: string;
 }

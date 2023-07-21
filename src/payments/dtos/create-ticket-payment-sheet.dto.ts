@@ -20,23 +20,18 @@ export class CreateTicketPaymentSheetDto {
   userId: string;
 
   @IsBoolean()
-  @IsOptional()
-  @ApiProperty()
-  isVip: boolean;
-
-  @IsBoolean()
   @Optional()
   @ApiProperty()
   sendInvoice: boolean;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty()
+  quantity: number;
 
   @IsString()
   @IsNotEmpty()
   @IsOptional()
   @ApiProperty()
   promotionCode?: string;
-
-  @IsNumber()
-  @IsOptional()
-  @ApiProperty()
-  ticketQuantity = 1;
 }

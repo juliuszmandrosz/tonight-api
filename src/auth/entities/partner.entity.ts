@@ -20,4 +20,8 @@ export class Partner implements BaseEntity {
   @IsString()
   @IsNotEmpty()
   clubId: string;
+
+  @IsString()
+  @IsOptional()
+  connectedStripeAccountId?: string;
 }

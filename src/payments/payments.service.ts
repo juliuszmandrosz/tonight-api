@@ -11,9 +11,6 @@ import { AppConfigService } from '@config/app-config.service';
 import { PaymentFailure } from '@payments/types/payment-failure.type';
 import { CloudTasksService } from '@cloud-tasks/cloud-tasks.service';
 import { CancelTicketReservationDto } from '@payments/dtos/cancel-ticket-reservation.dto';
-import { CreateVipPaymentSheetDto } from '@payments/dtos/create-vip-payment-sheet.dto';
-import { VipPaymentSession } from '@payments/entities/vip-payment-session.entity';
-import { EventFailure } from '@events/event-failure.type';
 import { EventFees } from '@payments/interfaces/event-fees.interface';
 import { StripeProvider } from '../stripe/stripe-providers';
 import { CreateTicketPaymentSheetDto } from '@payments/dtos/create-ticket-payment-sheet.dto';
@@ -33,200 +30,53 @@ export class PaymentsService {
     dto: CreateTicketPaymentSheetDto,
   ): Promise<PaymentSheet> {
     const event = await this.eventService.checkIfEventIsActive(dto.eventId);
-
-    await this.checkIfUserAlreadyHasTicketForEvent(dto.userId, dto.eventId);
-
-    await this.cancelExistingPaymentSession(dto.eventId, dto.userId);
-
-    await this.eventTicketsService.checkIfEventIsSoldOut(
+    await this.eventTicketsService.checkIfTicketsAreAvailable(
       event.clubId,
       event.id,
     );
-
-    const vipPrice = dto.isVip
-      ? await this.eventTicketsService.getVipPrice(event.clubId, event.id)
-      : 0;
-
-    if (dto.isVip && !vipPrice) {
-      const response: PaymentFailure = 'vip-no-longer-available';
-      throw new HttpException(response, HttpStatus.GONE);
-    }
-
     const serviceFeeAmount = this.getServiceFeeAmount(
-      event.price + vipPrice,
+      event.price,
       event.currency,
     );
-
     const promotionCodeAmountOff = dto.promotionCode
       ? await this.getPromotionCode(dto.userId, dto.promotionCode).then(
           (code) => code.amountOff,
         )
       : 0;
-
-    const revenue = event.price + vipPrice;
-
+    const revenue = event.price * dto.quantity;
     const paymentSheetAmount = PaymentsService.getPaymentSheetAmount({
       revenue,
       serviceFeeAmount: serviceFeeAmount,
       promotionCodeAmountOff: promotionCodeAmountOff,
     });
-
     const paymentSheet = await this.createPaymentSheetForUser({
       amount: paymentSheetAmount,
       description: event.eventName,
       currency: event.currency,
       userId: dto.userId,
+      connectedAccountId: event.connectedStripeAccountId,
     });
-
-    const cancelTicketReservationTaskId =
-      await this.createCancelTicketReservationTask(
-        paymentSheet.paymentIntentId,
-      );
-
     await this.firestoreDataService.ticketPaymentSessions.create(
       paymentSheet.paymentIntentId,
       new TicketPaymentSession({
         userId: dto.userId,
         status: 'requires_payment_method',
         revenue,
-        isVip: dto.isVip,
-        serviceFeeAmount,
-        promotionCodeAmountOff,
-        promotionCode: dto.promotionCode,
-        stripeCustomerId: paymentSheet.customerId,
-        sendInvoice: dto.sendInvoice,
-        cancelTicketReservationTaskId,
-        eventId: event.id,
-      }),
-    );
-
-    const updatedTicketPrice =
-      await this.eventTicketsService.updateEventTicketsOnTicketPayment(
-        event,
-        dto.isVip,
-      );
-
-    await this.eventService.updateEventOnTicketPayment(
-      event.id,
-      updatedTicketPrice,
-    );
-
-    return paymentSheet;
-  }
-
-  async createVipPaymentSheet(
-    dto: CreateVipPaymentSheetDto,
-  ): Promise<PaymentSheet> {
-    const ticket = await this.firestoreDataService.tickets.findById(
-      dto.userId,
-      dto.ticketId,
-    );
-
-    if (!ticket) {
-      throw new HttpException('invalid-ticket', HttpStatus.NOT_FOUND);
-    }
-
-    if (ticket.isVip) {
-      const response: PaymentFailure = 'ticket-already-has-vip';
-      throw new HttpException(response, HttpStatus.CONFLICT);
-    }
-
-    const event = await this.eventService.checkIfEventIsActive(ticket.eventId);
-
-    const vipPrice = await this.eventTicketsService.getVipPrice(
-      event.clubId,
-      event.id,
-    );
-
-    if (!vipPrice) {
-      const response: PaymentFailure = 'vip-no-longer-available';
-      throw new HttpException(response, HttpStatus.GONE);
-    }
-
-    const serviceFeeAmount = this.getServiceFeeAmount(vipPrice, event.currency);
-
-    const promotionCodeAmountOff = dto.promotionCode
-      ? await this.getPromotionCode(dto.userId, dto.promotionCode).then(
-          (code) => code.amountOff,
-        )
-      : 0;
-
-    const paymentSheetAmount = PaymentsService.getPaymentSheetAmount({
-      revenue: vipPrice,
-      serviceFeeAmount: serviceFeeAmount,
-      promotionCodeAmountOff: promotionCodeAmountOff,
-    });
-
-    const paymentSheet = await this.createPaymentSheetForUser({
-      amount: paymentSheetAmount,
-      description: event.eventName,
-      currency: event.currency,
-      userId: dto.userId,
-    });
-
-    await this.firestoreDataService.vipPaymentSessions.create(
-      paymentSheet.paymentIntentId,
-      new VipPaymentSession({
-        userId: dto.userId,
-        status: 'requires_payment_method',
-        revenue: vipPrice,
         serviceFeeAmount,
         promotionCodeAmountOff,
         promotionCode: dto.promotionCode,
         stripeCustomerId: paymentSheet.customerId,
         sendInvoice: dto.sendInvoice,
         eventId: event.id,
-        ticketId: dto.ticketId,
+        ticketQuantity: dto.quantity,
+        connectedStripeAccountId: event.connectedStripeAccountId,
       }),
     );
-
     return paymentSheet;
   }
 
   async cancelTicketReservation(dto: CancelTicketReservationDto) {
-    const session =
-      await this.firestoreDataService.ticketPaymentSessions.findById(
-        dto.ticketPaymentSessionId,
-      );
-
-    if (!session) {
-      const response = 'invalid-ticket-payment-session';
-      throw new HttpException(response, HttpStatus.NOT_FOUND);
-    }
-
-    if (session.status === 'canceled') return;
-
-    await this.cloudTasksService.deleteCloudTask(
-      session.cancelTicketReservationTaskId,
-    );
-
-    session.status = 'canceled';
-
-    await this.firestoreDataService.ticketPaymentSessions.update(
-      session.id,
-      session,
-    );
-
-    const event = await this.firestoreDataService.events.findById(
-      session.eventId,
-    );
-
-    if (!event) {
-      const response: EventFailure = 'invalid-event';
-      throw new HttpException(response, HttpStatus.NOT_FOUND);
-    }
-
-    const updatedTicketPrice =
-      await this.eventTicketsService.updateEventTicketsOnCancelReservation({
-        event,
-        isVip: session.isVip,
-        canceledAmount: session.revenue,
-      });
-
-    await this.eventService.updateEventOnCancelReservation(
-      event.id,
-      updatedTicketPrice,
-    );
+    return;
   }
 
   getServiceFee() {
@@ -245,33 +95,15 @@ export class PaymentsService {
   ): Promise<PromotionCode> {
     const promotionCode =
       await this.firestoreDataService.promotionCodes.findById(userId, code);
-
     if (!promotionCode) {
       const response: PaymentFailure = 'invalid-promotion-code';
       throw new HttpException(response, HttpStatus.NOT_FOUND);
     }
-
     if (!promotionCode.isValid) {
       const response: PaymentFailure = 'promotion-code-expired';
       throw new HttpException(response, HttpStatus.GONE);
     }
-
     return promotionCode;
-  }
-
-  private async createCancelTicketReservationTask(
-    ticketPaymentSessionId: string,
-  ) {
-    const payload: CancelTicketReservationDto = {
-      ticketPaymentSessionId,
-    };
-
-    return this.cloudTasksService.createCloudTask<CancelTicketReservationDto>({
-      executionTimeInSeconds: 600,
-      payload,
-      callbackName: 'cancelTicketReservationOnCloudTaskCallback',
-      queueName: 'cancel-ticket-reservation',
-    });
   }
 
   private async createPaymentSheetForUser({
@@ -279,15 +111,14 @@ export class PaymentsService {
     description,
     currency,
     userId,
+    connectedAccountId,
   }: CreatePaymentSheetForUserParams): Promise<PaymentSheet> {
     const stripeCustomer =
       await this.firestoreDataService.stripeCustomers.findById(userId);
-
     if (!stripeCustomer) {
       const response = 'invalid-stripe-customer';
       throw new HttpException(response, HttpStatus.NOT_FOUND);
     }
-
     const ephemeralKeySecret = await this.tryCreateEphemeralKey(
       stripeCustomer.customerId,
     );
@@ -296,23 +127,23 @@ export class PaymentsService {
       stripeCustomer.paymentMethod,
     );
     const paymentIntentAmount = PaymentsService.getPaymentIntentAmount(amount);
-
     const paymentIntent = await this.stripe.paymentIntents.create({
       currency,
       description,
       amount: paymentIntentAmount,
       customer: stripeCustomer.customerId,
       payment_method_types: paymentMethodTypes,
-      receipt_email: stripeCustomer.email,
+      receipt_email: stripeCustomer.email ? stripeCustomer.email : undefined,
+      transfer_data: {
+        destination: connectedAccountId,
+      },
     });
-
     if (!paymentIntent.client_secret) {
       throw new HttpException(
         'Error creating payment intent',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-
     return {
       customerId: stripeCustomer.customerId,
       ephemeralKeySecret,
@@ -327,13 +158,9 @@ export class PaymentsService {
     promotionCodeAmountOff,
   }: GetTicketPaymentSheetAmountParams) {
     let amount = 0;
-
     amount += revenue;
-
     amount += serviceFeeAmount;
-
     amount -= promotionCodeAmountOff;
-
     return amount;
   }
 
@@ -346,9 +173,8 @@ export class PaymentsService {
   private static getMinimalFeeAmount(currency: string) {
     // TODO - get from currency params
     if (currency.toUpperCase() === 'PLN') {
-      return 1;
+      return 0;
     }
-
     return 0;
   }
 
@@ -391,49 +217,6 @@ export class PaymentsService {
 
     return ephemeralKey.secret;
   }
-
-  private async cancelExistingPaymentSession(eventId: string, userId: string) {
-    const existingTicketPaymentSession =
-      await this.firestoreDataService.ticketPaymentSessions.findOneByParams([
-        { fieldName: 'eventId', operator: '==', fieldValue: eventId },
-        { fieldName: 'userId', operator: '==', fieldValue: userId },
-        {
-          fieldName: 'status',
-          operator: 'in',
-          fieldValue: ['requires_payment_method', 'requires_action'],
-        },
-      ]);
-
-    if (existingTicketPaymentSession) {
-      await this.cancelTicketReservation({
-        ticketPaymentSessionId: existingTicketPaymentSession.id,
-      });
-    }
-  }
-
-  private async checkIfUserAlreadyHasTicketForEvent(
-    userId: string,
-    eventId: string,
-  ) {
-    const existingTicket =
-      await this.firestoreDataService.tickets.findOneByParams(userId, [
-        {
-          fieldName: 'eventId',
-          operator: '==',
-          fieldValue: eventId,
-        },
-        {
-          fieldName: 'isReturned',
-          operator: '==',
-          fieldValue: false,
-        },
-      ]);
-
-    if (existingTicket) {
-      const response: PaymentFailure = 'user-already-has-ticket';
-      throw new HttpException(response, HttpStatus.CONFLICT);
-    }
-  }
 }
 
 interface GetTicketPaymentSheetAmountParams {
@@ -447,4 +230,5 @@ export interface CreatePaymentSheetForUserParams {
   description: string;
   currency: string;
   userId: string;
+  connectedAccountId: string;
 }

@@ -1,5 +1,4 @@
 import { firestore } from 'firebase-admin';
-import Timestamp = firestore.Timestamp;
 import { BaseEntity } from '@core/base-entity';
 import {
   IsBoolean,
@@ -8,6 +7,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
+import Timestamp = firestore.Timestamp;
 
 export class Ticket implements BaseEntity {
   static parentCollectionName = 'users';
@@ -52,12 +52,13 @@ export class Ticket implements BaseEntity {
   @IsNotEmpty()
   price: number;
 
+  @IsNumber()
+  @IsNotEmpty()
+  quantity: number;
+
   @IsString()
   @IsNotEmpty()
   currency: string;
-
-  @IsBoolean()
-  isVip: boolean;
 
   @IsBoolean()
   isExpired: boolean;
@@ -75,9 +76,4 @@ export class Ticket implements BaseEntity {
   @IsOptional()
   @IsNotEmpty()
   reviewId?: string;
-
-  @IsString()
-  @IsOptional()
-  @IsNotEmpty()
-  vipPaymentId?: string;
 }

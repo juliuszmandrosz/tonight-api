@@ -5,15 +5,9 @@ import { TicketSales } from '@event-tickets/entities/ticket-sales.entity';
 export class TicketSalesService {
   updateTicketSalesOnTicketPayment({
     revenue,
-    isVip,
     ticketSales,
   }: UpdateEventTicketsOnTicketPaymentParams) {
     ticketSales.ticketsSold++;
-
-    if (isVip) {
-      ticketSales.vipsSold++;
-    }
-
     ticketSales.totalRevenue += revenue;
     ticketSales.clubIncome += TicketSalesService.getClubIncome(
       revenue,
@@ -53,7 +47,6 @@ export class TicketSalesService {
 
 interface UpdateEventTicketsOnTicketPaymentParams {
   revenue: number;
-  isVip: boolean;
   ticketSales: TicketSales;
 }
 
