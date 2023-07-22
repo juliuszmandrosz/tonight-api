@@ -5,7 +5,7 @@ import { TypesenseRepository } from '@data-services/typesense/typesense-reposito
 import { Club } from '@clubs/club.entity';
 import { TypesenseClientProvider } from '@typesense/typesense-providers';
 import { Client } from 'typesense';
-import { WallPhoto } from '../../wall_photos/wall-photo.entity';
+import { WallPhoto } from '@wall-photos/wall-photo.entity';
 
 @Injectable()
 export class TypesenseDataService implements OnApplicationBootstrap {

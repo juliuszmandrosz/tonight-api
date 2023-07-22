@@ -8,6 +8,7 @@ export interface ConfigTemplate {
   firestore: FirestoreConfig;
   typesense: TypesenseConfig;
   googlePlaces: GooglePlacesConfig;
+  shopify: ShopifyConfig;
 }
 
 export interface CloudFunctionsConfig {
@@ -18,6 +19,12 @@ export interface CloudFunctionsConfig {
 export interface StripeConfig {
   apiVersion: string;
   apiKey: string;
+}
+
+export interface ShopifyConfig {
+  apiKey: string;
+  accessToken: string;
+  shopName: string;
 }
 
 export interface FirestoreConfig {

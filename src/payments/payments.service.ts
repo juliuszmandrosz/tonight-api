@@ -12,7 +12,7 @@ import { PaymentFailure } from '@payments/types/payment-failure.type';
 import { CloudTasksService } from '@cloud-tasks/cloud-tasks.service';
 import { CancelTicketReservationDto } from '@payments/dtos/cancel-ticket-reservation.dto';
 import { EventFees } from '@payments/interfaces/event-fees.interface';
-import { StripeProvider } from '../stripe/stripe-providers';
+import { StripeProvider } from '@stripe/stripe-providers';
 import { CreateTicketPaymentSheetDto } from '@payments/dtos/create-ticket-payment-sheet.dto';
 
 @Injectable()

@@ -4,6 +4,7 @@ import {
   CloudFunctionsConfig,
   FirestoreConfig,
   GooglePlacesConfig,
+  ShopifyConfig,
   StripeConfig,
   TypesenseConfig,
 } from '@config/config-template';
@@ -15,6 +16,7 @@ import {
   normalEventFee,
   port,
   serviceFee,
+  shopify,
   stripe,
   typesense,
 } from '@config/config-keys';
@@ -57,5 +59,9 @@ export class AppConfigService {
 
   getGooglePlacesConfig() {
     return this.configService.get<GooglePlacesConfig>(googlePlaces);
+  }
+
+  getShopifyConfig() {
+    return this.configService.get<ShopifyConfig>(shopify);
   }
 }
