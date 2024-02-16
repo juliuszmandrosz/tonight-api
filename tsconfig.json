@@ -59,6 +59,15 @@
       ],
       "@google-places/*": [
         "./google-places/*"
+      ],
+      "@stripe/*": [
+        "./stripe/*"
+      ],
+      "@shopify/*": [
+        "./shopify/*"
+      ],
+      "@wall-photos/*": [
+        "./wall-photos/*"
       ]
     }
   }

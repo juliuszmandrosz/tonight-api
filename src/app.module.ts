@@ -13,8 +13,11 @@ import { CloudTasksModule } from '@cloud-tasks/cloud-tasks.module';
 import { AuthModule } from '@auth/auth.module';
 import { TypesenseModule } from '@typesense/typesense.module';
 import { GooglePlacesModule } from '@google-places/google-places.module';
-import { StripeModule } from './stripe/stripe.module';
-import { WallPhotosModule } from './wall_photos/wall-photos.module';
+import { StripeModule } from '@stripe/stripe.module';
+import { WallPhotosModule } from '@wall-photos/wall-photos.module';
+import { ShopifyModule } from '@shopify/shopify.module';
+import { ProductsModule } from './products/products.module';
+import { DiscountsModule } from './discounts/discounts.module';
 
 @Module({
   imports: [
@@ -47,10 +50,13 @@ import { WallPhotosModule } from './wall_photos/wall-photos.module';
 
     StripeModule.forRoot({
       imports: [AppConfigModule],
-      useFactory: (appConfigService) => ({
-        apiKey: appConfigService.getStripeConfig().apiKey,
-        apiVersion: appConfigService.getStripeConfig().apiVersion,
-      }),
+      useFactory: (appConfigService) => appConfigService.getStripeConfig(),
+      inject: [AppConfigService],
+    }),
+
+    ShopifyModule.forRoot({
+      imports: [AppConfigModule],
+      useFactory: (appConfigService) => appConfigService.getShopifyConfig(),
       inject: [AppConfigService],
     }),
 
@@ -63,6 +69,8 @@ import { WallPhotosModule } from './wall_photos/wall-photos.module';
     EventTicketsModule,
     CoreModule,
     WallPhotosModule,
+    ProductsModule,
+    DiscountsModule,
   ],
 })
 export class AppModule {}

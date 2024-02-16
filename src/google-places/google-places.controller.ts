@@ -1,8 +1,8 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { GooglePlacesService } from './google-places.service';
 import { GetCitiesDto } from './dtos/get-cities.dto';
-import { FirebaseAuthGuard } from '@core/firebase-auth.guard';
 import { City } from '@google-places/interfaces/city.interface';
+import { FirebaseAuthGuard } from '@core/firebase-auth.guard';
 
 @UseGuards(FirebaseAuthGuard)
 @Controller('googlePlaces')
