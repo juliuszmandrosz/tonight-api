@@ -50,5 +50,5 @@ export class User implements BaseEntity {
 
   @IsNumber()
   @IsOptional()
-  raverCoins: number = 0;
+  raverCoins = 0;
 }
