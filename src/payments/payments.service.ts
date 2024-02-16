@@ -69,7 +69,9 @@ export class PaymentsService {
         sendInvoice: dto.sendInvoice,
         eventId: event.id,
         ticketQuantity: dto.quantity,
-        connectedStripeAccountId: event.connectedStripeAccountId,
+        connectedStripeAccountId: event.connectedStripeAccountId
+          ? event.connectedStripeAccountId
+          : null,
       }),
     );
     return paymentSheet;
@@ -134,9 +136,11 @@ export class PaymentsService {
       customer: stripeCustomer.customerId,
       payment_method_types: paymentMethodTypes,
       receipt_email: stripeCustomer.email ? stripeCustomer.email : undefined,
-      transfer_data: {
-        destination: connectedAccountId,
-      },
+      transfer_data: connectedAccountId
+        ? {
+            destination: connectedAccountId,
+          }
+        : undefined,
     });
     if (!paymentIntent.client_secret) {
       throw new HttpException(

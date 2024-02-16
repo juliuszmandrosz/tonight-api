@@ -17,6 +17,7 @@ import { StripeModule } from '@stripe/stripe.module';
 import { WallPhotosModule } from '@wall-photos/wall-photos.module';
 import { ShopifyModule } from '@shopify/shopify.module';
 import { ProductsModule } from './products/products.module';
+import { DiscountsModule } from './discounts/discounts.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { ProductsModule } from './products/products.module';
     CoreModule,
     WallPhotosModule,
     ProductsModule,
+    DiscountsModule,
   ],
 })
 export class AppModule {}

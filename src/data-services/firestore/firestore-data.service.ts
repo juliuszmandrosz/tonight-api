@@ -17,6 +17,9 @@ import { Selector } from '@auth/entities/selector.entity';
 import { ClubSelector } from '@auth/entities/club-selector.entity';
 import { Firestore } from 'firebase-admin/firestore';
 import { Club } from '@clubs/club.entity';
+import { MarketplaceDiscount } from '../../discounts/entities/marketplace-discount.entity';
+import { UserMarketplaceDiscount } from '../../discounts/entities/user-marketplace-discount.entity';
+import { Transaction } from 'firebase-admin/lib/firestore';
 
 @Injectable()
 export class FirestoreDataService implements OnApplicationBootstrap {
@@ -34,6 +37,8 @@ export class FirestoreDataService implements OnApplicationBootstrap {
   selectors: FirestoreCollectionRepository<Selector>;
   clubSelectors: FirestoreSubcollectionRepository<ClubSelector>;
   clubs: FirestoreCollectionRepository<Club>;
+  marketplaceDiscounts: FirestoreCollectionRepository<MarketplaceDiscount>;
+  userMarketplaceDiscounts: FirestoreSubcollectionRepository<UserMarketplaceDiscount>;
 
   constructor(
     @Inject(FirestoreDatabaseProvider) private firestore: Firestore,
@@ -117,5 +122,24 @@ export class FirestoreDataService implements OnApplicationBootstrap {
       this.firestore,
       Club.collectionName,
     );
+
+    this.marketplaceDiscounts =
+      new FirestoreCollectionRepository<MarketplaceDiscount>(
+        this.firestore,
+        MarketplaceDiscount.collectionName,
+      );
+
+    this.userMarketplaceDiscounts =
+      new FirestoreSubcollectionRepository<UserMarketplaceDiscount>(
+        this.firestore,
+        UserMarketplaceDiscount.parentCollectionName,
+        UserMarketplaceDiscount.subCollectionName,
+      );
+  }
+
+  runTransaction<T>(
+    updateFunction: (transaction: Transaction) => Promise<T>,
+  ): Promise<T> {
+    return this.firestore.runTransaction(updateFunction);
   }
 }

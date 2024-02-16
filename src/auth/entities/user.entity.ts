@@ -2,6 +2,7 @@ import {
   IsArray,
   IsEmail,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -46,4 +47,8 @@ export class User implements BaseEntity {
   @IsString()
   @IsOptional()
   phoneNumber?: string;
+
+  @IsNumber()
+  @IsOptional()
+  raverCoins: number = 0;
 }
