@@ -27,8 +27,8 @@ export class TicketPaymentSession implements BaseEntity {
   userId: string;
 
   @IsString()
-  @IsNotEmpty()
-  stripeCustomerId: string;
+  @IsOptional()
+  stripeCustomerId?: string;
 
   @IsString()
   @IsNotEmpty()
