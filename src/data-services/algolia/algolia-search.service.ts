@@ -9,11 +9,11 @@ export class AlgoliaSearchService {
   search(queryDto: AlgoliaQueryDto) {
     return this.algoliaDataService.indexes[queryDto.index].search({
       query: queryDto.query,
-      aroundLatLng: queryDto.aroundLatLng,
-      aroundRadius: queryDto.aroundRadius,
       pageSize: queryDto.pageSize,
       filterBy: queryDto.filterBy,
       pageNumber: queryDto.pageNumber,
+      aroundLatLng: queryDto.aroundLatLng ? queryDto.aroundLatLng : undefined,
+      aroundRadius: queryDto.aroundRadius ? queryDto.aroundRadius : undefined,
     });
   }
 }
