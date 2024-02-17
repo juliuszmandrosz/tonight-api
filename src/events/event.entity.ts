@@ -62,7 +62,7 @@ export class Event implements BaseEntity {
   musicalGenres: string[];
 
   @IsNotEmpty()
-  _geoloc: { [key: string]: number };
+  location: number[];
 
   @IsString()
   @IsNotEmpty()

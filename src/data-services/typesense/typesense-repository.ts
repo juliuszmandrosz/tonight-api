@@ -1,6 +1,6 @@
 import { BaseEntity } from '@core/base-entity';
 import { TypesenseRepositoryParams } from '@data-services/typesense/interfaces/typesense-repository-params.interface';
-import { RetrieveParams } from '@data-services/typesense/interfaces/retrieve-params.interface';
+import { TypesenseRetrieveParams } from '@data-services/typesense/interfaces/typesense-retrieve-params.interface';
 
 export class TypesenseRepository<T extends BaseEntity> {
   constructor(private params: TypesenseRepositoryParams) {}
@@ -12,7 +12,7 @@ export class TypesenseRepository<T extends BaseEntity> {
     pageNumber,
     pageSize,
     sortBy,
-  }: RetrieveParams): Promise<T[]> {
+  }: TypesenseRetrieveParams): Promise<T[]> {
     const result = await this.params.typesense
       .collections(this.params.collectionName)
       .documents()

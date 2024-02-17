@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  AlgoliaConfig,
   CloudFunctionsConfig,
   FirestoreConfig,
   GooglePlacesConfig,
@@ -9,6 +10,7 @@ import {
   TypesenseConfig,
 } from '@config/config-template';
 import {
+  algolia,
   cloudFunctions,
   exclusiveEventFee,
   firestore,
@@ -55,6 +57,10 @@ export class AppConfigService {
 
   getTypesenseConfig() {
     return this.configService.get<TypesenseConfig>(typesense);
+  }
+
+  getAlgoliaConfig() {
+    return this.configService.get<AlgoliaConfig>(algolia);
   }
 
   getGooglePlacesConfig() {

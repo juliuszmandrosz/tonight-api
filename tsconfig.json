@@ -66,8 +66,14 @@
       "@shopify/*": [
         "./shopify/*"
       ],
-      "@wall-photos/*": [
-        "./wall-photos/*"
+      "@discounts/*": [
+        "./discounts/*"
+      ],
+      "@products/*": [
+        "./products/*"
+      ],
+      "@algolia/*": [
+        "./algolia/*"
       ]
     }
   }

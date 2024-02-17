@@ -9,6 +9,7 @@ export interface ConfigTemplate {
   typesense: TypesenseConfig;
   googlePlaces: GooglePlacesConfig;
   shopify: ShopifyConfig;
+  algolia: AlgoliaConfig;
 }
 
 export interface CloudFunctionsConfig {
@@ -43,5 +44,10 @@ export interface TypesenseConfig {
 }
 
 export interface GooglePlacesConfig {
+  apiKey: string;
+}
+
+export interface AlgoliaConfig {
+  appId: string;
   apiKey: string;
 }

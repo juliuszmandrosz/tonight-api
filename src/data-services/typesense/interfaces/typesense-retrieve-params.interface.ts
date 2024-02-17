@@ -1,4 +1,4 @@
-export interface RetrieveParams {
+export interface TypesenseRetrieveParams {
   query: string;
   queryBy: string;
   filterBy: string;

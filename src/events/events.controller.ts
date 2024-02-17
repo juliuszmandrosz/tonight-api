@@ -8,6 +8,7 @@ import { FirebaseAuthGuard } from '@core/firebase-auth.guard';
 export class EventsController {
   constructor(private eventsService: EventsService) {}
 
+  // legacy, from typesense
   @Post('getEvents') getEvents(@Body() dto: GetEventsDto) {
     return this.eventsService.getEvents(dto);
   }

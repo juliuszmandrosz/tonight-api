@@ -11,13 +11,14 @@ import { AppConfigService } from '@config/app-config.service';
 import { CoreModule } from '@core/core.module';
 import { CloudTasksModule } from '@cloud-tasks/cloud-tasks.module';
 import { AuthModule } from '@auth/auth.module';
-import { TypesenseModule } from '@typesense/typesense.module';
 import { GooglePlacesModule } from '@google-places/google-places.module';
 import { StripeModule } from '@stripe/stripe.module';
-import { WallPhotosModule } from '@wall-photos/wall-photos.module';
 import { ShopifyModule } from '@shopify/shopify.module';
-import { ProductsModule } from './products/products.module';
-import { DiscountsModule } from './discounts/discounts.module';
+import { ProductsModule } from '@products/products.module';
+import { DiscountsModule } from '@discounts/discounts.module';
+import { AlgoliaModule } from '@algolia/algolia.module';
+import { TypesenseModule } from '@typesense/typesense.module';
+import { AlgoliaDataServiceModule } from '@data-services/algolia/algolia-data-service.module';
 
 @Module({
   imports: [
@@ -25,6 +26,13 @@ import { DiscountsModule } from './discounts/discounts.module';
       isGlobal: true,
       envFilePath: '.env',
       load: [config],
+    }),
+
+    AlgoliaModule.forRoot({
+      imports: [AppConfigModule],
+      useFactory: (appConfigService: AppConfigService) =>
+        appConfigService.getAlgoliaConfig(),
+      inject: [AppConfigService],
     }),
 
     TypesenseModule.forRoot({
@@ -68,9 +76,9 @@ import { DiscountsModule } from './discounts/discounts.module';
     EventsModule,
     EventTicketsModule,
     CoreModule,
-    WallPhotosModule,
     ProductsModule,
     DiscountsModule,
+    AlgoliaDataServiceModule,
   ],
 })
 export class AppModule {}
