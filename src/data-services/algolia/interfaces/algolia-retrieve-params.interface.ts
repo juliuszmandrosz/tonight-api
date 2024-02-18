@@ -1,8 +1,8 @@
 export interface AlgoliaRetrieveParams {
   query: string;
-  filterBy: string[][];
+  filters: string;
   aroundLatLng: string;
   aroundRadius: number;
-  pageNumber: number;
-  pageSize: number;
+  page: number;
+  hitsPerPage: number;
 }

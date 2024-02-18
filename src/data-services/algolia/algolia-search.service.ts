@@ -9,9 +9,9 @@ export class AlgoliaSearchService {
   search(queryDto: AlgoliaQueryDto) {
     return this.algoliaDataService.indexes[queryDto.index].search({
       query: queryDto.query,
-      pageSize: queryDto.pageSize,
-      filterBy: queryDto.filterBy,
-      pageNumber: queryDto.pageNumber,
+      page: queryDto.page,
+      hitsPerPage: queryDto.hitsPerPage,
+      filters: queryDto.filters,
       aroundLatLng: queryDto.aroundLatLng ? queryDto.aroundLatLng : undefined,
       aroundRadius: queryDto.aroundRadius ? queryDto.aroundRadius : undefined,
     });

@@ -8,18 +8,18 @@ export class AlgoliaRepository<T extends BaseEntity> {
 
   async search({
     query,
-    filterBy,
-    pageNumber,
+    filters,
+    page,
     aroundLatLng,
     aroundRadius,
-    pageSize,
+    hitsPerPage,
   }: AlgoliaRetrieveParams): Promise<T[]> {
     const response = await this.params.index.search(query, {
-      facetFilters: filterBy,
-      page: pageNumber,
-      hitsPerPage: pageSize,
-      aroundLatLng: aroundLatLng,
-      aroundRadius: aroundRadius,
+      filters,
+      page,
+      hitsPerPage,
+      aroundLatLng,
+      aroundRadius,
     });
 
     return mapAlgoliaResults<T>(response.hits);

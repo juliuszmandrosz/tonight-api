@@ -1,5 +1,4 @@
 import {
-  IsArray,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -15,16 +14,16 @@ export class AlgoliaQueryDto {
   @IsString()
   query: string;
 
-  @IsArray()
-  filterBy: string[][];
+  @IsString()
+  filters: string;
 
   @IsNumber()
   @IsNotEmpty()
-  pageNumber: number;
+  page: number;
 
   @IsNumber()
   @IsNotEmpty()
-  pageSize: number;
+  hitsPerPage: number;
 
   @IsString()
   @IsOptional()
