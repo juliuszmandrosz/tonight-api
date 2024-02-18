@@ -27,9 +27,9 @@ export class AlgoliaQueryDto {
 
   @IsString()
   @IsOptional()
-  aroundLatLng: string;
+  aroundLatLng?: string;
 
   @IsNumber()
   @IsOptional()
-  aroundRadius: number;
+  aroundRadius?: number;
 }
