@@ -10,6 +10,7 @@ import { BaseEntity } from '@core/base-entity';
 @Injectable()
 export class AlgoliaDataService implements OnApplicationBootstrap {
   private events: AlgoliaRepository<Event>;
+  private eventsAttendingDesc: AlgoliaRepository<Event>;
   private clubs: AlgoliaRepository<Club>;
   private collectives: AlgoliaRepository<BaseEntity>;
   private artists: AlgoliaRepository<BaseEntity>;
@@ -19,20 +20,24 @@ export class AlgoliaDataService implements OnApplicationBootstrap {
 
   onApplicationBootstrap() {
     this.events = new AlgoliaRepository<Event>({
-      index: this.algolia.initIndex(Event.collectionName),
+      index: this.algolia.initIndex(AlgoliaIndex.events),
+    });
+
+    this.eventsAttendingDesc = new AlgoliaRepository<Event>({
+      index: this.algolia.initIndex(AlgoliaIndex.events_attending_desc),
     });
 
     this.clubs = new AlgoliaRepository<Club>({
-      index: this.algolia.initIndex(Club.collectionName),
+      index: this.algolia.initIndex(AlgoliaIndex.clubs),
     });
 
     // TODO - add collectives and artists
     this.collectives = new AlgoliaRepository<BaseEntity>({
-      index: this.algolia.initIndex('collectives'),
+      index: this.algolia.initIndex(AlgoliaIndex.collectives),
     });
 
     this.artists = new AlgoliaRepository<BaseEntity>({
-      index: this.algolia.initIndex('artists'),
+      index: this.algolia.initIndex(AlgoliaIndex.artists),
     });
 
     this.indexes = {
@@ -40,6 +45,7 @@ export class AlgoliaDataService implements OnApplicationBootstrap {
       [AlgoliaIndex.clubs]: this.clubs,
       [AlgoliaIndex.collectives]: this.collectives,
       [AlgoliaIndex.artists]: this.artists,
+      [AlgoliaIndex.events_attending_desc]: this.eventsAttendingDesc,
     };
   }
 }
