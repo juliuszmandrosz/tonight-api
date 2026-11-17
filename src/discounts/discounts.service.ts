@@ -63,27 +63,6 @@ export class DiscountsService {
     }
   }
 
-  // async createPriceRule() {
-  //   try {
-  //     const priceRule = await this.shopify.priceRule.create({
-  //       title: 'Saszetka Vit2Go DRINK RECOVERY',
-  //       target_type: 'line_item',
-  //       value_type: 'percentage',
-  //       value: '-100.0',
-  //       customer_selection: 'all',
-  //       target_selection: 'all',
-  //       allocation_method: 'each',
-  //       starts_at: '2023-09-20T00:00:00Z',
-  //       usage_limit: 1,
-  //     });
-  //     console.log('Price Rule stworzone:', priceRule);
-  //     return priceRule.id; // Zwróć ID reguły, które będziesz używać później
-  //   } catch (e) {
-  //     console.log('Błąd przy tworzeniu Price Rule:', e.response.body);
-  //     throw e;
-  //   }
-  // }
-
   private async tryGetUser(userId: string) {
     const user = await this.firestoreDataService.users.findById(userId);
     if (!user) {

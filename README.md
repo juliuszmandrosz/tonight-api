@@ -51,9 +51,6 @@ FIRESTORE_APP_ID=
 FIRESTORE_MEASUREMENT_ID=
 ```
 
-## Tests
+## License
 
-```bash
-npm run test       # unit tests (Jest)
-npm run test:e2e   # end-to-end tests
-```
+Released under the [MIT License](LICENSE).
